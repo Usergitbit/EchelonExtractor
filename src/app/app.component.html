@@ -1,3 +1,14 @@
-<input type="file" id="file-selector" (change)="onFileSelected($event.target)">
-<img id="output" [src]="image">
+<!-- <input type="file" (change)="onFileSelected($event.target)">
+<img class="selected-image" [src]="image"> -->
+<canvas #canvasInput id="canvasInput"></canvas>
+<canvas #canvasOutput id="canvasOutput"></canvas>
+
+<div class="caption">
+    canvasInput
+    <input (change)="readDataUrl($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" />
+</div>
+
+<div>
+    <div class="control"><button id="tryIt" (click)="detectFace()" [disabled]="!(classifiersLoaded$ | async)">Detect Face</button></div>
+  </div>
 <router-outlet></router-outlet>
