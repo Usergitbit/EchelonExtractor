@@ -6,6 +6,8 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgOpenCVModule, OpenCVOptions } from 'ng-open-cv';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 const openCVConfig: OpenCVOptions = {
   scriptUrl: `assets/opencv/wasm/3.4/opencv.js`,
@@ -21,7 +23,8 @@ const openCVConfig: OpenCVOptions = {
     BrowserModule,
     AppRoutingModule,
     NgOpenCVModule.forRoot(openCVConfig),
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [],
   bootstrap: [AppComponent]
