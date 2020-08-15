@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { Observable, BehaviorSubject, forkJoin, fromEvent } from 'rxjs';
-import { tap, switchMap, filter } from 'rxjs/operators';
+import { tap, switchMap, filter, combineAll } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +18,18 @@ export class AppComponent {
   canvasInput!: ElementRef;
   @ViewChild('canvasOutput')
   canvasOutput!: ElementRef;
+  @ViewChild('canvasSelected')
+  canvasSelected!: ElementRef;
+  @ViewChild('canvasProcessed')
+  canvasProcessed!: ElementRef;
+  @ViewChild('canvasGray')
+  canvasGray!: ElementRef;
+  @ViewChild('canvasNumber')
+  canvasNumber!: ElementRef;
+  @ViewChild('canvasTemplate')
+  canvasTemplate!: ElementRef;
+
+  private debug: boolean = false;
 
   private classifiersLoaded = new BehaviorSubject<boolean>(false);
   classifiersLoaded$ = this.classifiersLoaded.asObservable();
@@ -90,6 +102,29 @@ export class AppComponent {
         .pipe(
           switchMap(() => {
             return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasInput.nativeElement);
+          })
+        )
+        .subscribe(
+          () => { },
+          err => {
+            console.log('Error loading image', err);
+          }
+        );
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+  }
+
+  readTemplateDataUrl(eventTarget: EventTarget | null) {
+
+    let fileInput = eventTarget as HTMLInputElement;
+
+    if (fileInput?.files?.length) {
+      const reader = new FileReader();
+      const load$ = fromEvent(reader, 'load');
+      load$
+        .pipe(
+          switchMap(() => {
+            return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasTemplate.nativeElement);
           })
         )
         .subscribe(
@@ -208,6 +243,100 @@ export class AppComponent {
     eyes.delete();
   }
 
+  public grayScale(): void {
+    const sourceImage = cv.imread(this.canvasInput.nativeElement.id);
+    const grayScaledImage = new cv.Mat();
+    cv.cvtColor(sourceImage, grayScaledImage, cv.COLOR_RGBA2GRAY);
+    cv.imshow(this.canvasOutput.nativeElement.id, grayScaledImage);
+    sourceImage.delete();
+    grayScaledImage.delete();
+  }
+
+  public detectShapes(): void {
+    // const sourceImage =  cv.imread(this.canvasInput.nativeElement.id);
+    // const grayScaledImage = new cv.Mat();
+    // cv.cvtColor(sourceImage, grayScaledImage, cv.COLOR_RGBA2GRAY);
+    // const thresholded = new cv.Mat();
+    // cv.adaptiveThreshold(grayScaledImage, thresholded, 200, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 3, 2);
+    // cv.imshow(this.canvasOutput.nativeElement.id, thresholded);
+    let initial = cv.imread(this.canvasInput.nativeElement.id);
+    let src = cv.imread(this.canvasInput.nativeElement.id);
+    let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+
+    if (this.debug)
+      cv.imshow(this.canvasGray.nativeElement.id, src);
+
+    cv.threshold(src, src, 50, 250, cv.THRESH_BINARY);
+    if (this.debug)
+      cv.imshow(this.canvasProcessed.nativeElement.id, src);
+
+    let contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
+    cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+
+    let copied;
+
+    for (let i = 0; i < contours.size(); ++i) {
+      let cnt = contours.get(i);
+      let approx = new cv.Mat();
+      let peri = cv.arcLength(cnt, true);
+      cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
+
+      let rect = cv.boundingRect(cnt);
+      const aspectRatio = rect.width / rect.height;
+      //if (rect.width > 960 && rect.height > 15 && rect.height < rect.width && rect.height < 200) {
+      if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
+        console.log(`${i} : Width:${rect.width} Height:${rect.height}`);
+        let contoursColor = new cv.Scalar(255, 255, 255);
+        let rectangleColor = new cv.Scalar(255, 0, 0);
+        cv.drawContours(dst, contours, 0, contoursColor, 1, 8, hierarchy, 100);
+        let point1 = new cv.Point(rect.x, rect.y);
+        let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+        cv.rectangle(dst, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
+
+        if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100)
+          copied = initial.roi(rect);
+
+
+
+
+        cnt.delete();
+      }
+
+
+
+    }
+
+    if (this.debug)
+      cv.imshow(this.canvasOutput.nativeElement.id, dst);
+    cv.imshow(this.canvasSelected.nativeElement.id, copied);
+
+    contours.delete(); hierarchy.delete();
+
+    src.delete();
+    dst.delete();
+    initial.delete();
+    copied.delete();
+
+  }
+
+  public findNumber(): void {
+    let src = cv.imread(this.canvasInput.nativeElement.id);
+    let templ = cv.imread(this.canvasTemplate.nativeElement.id);
+    let dst = new cv.Mat();
+    let mask = new cv.Mat();
+    cv.matchTemplate(src, templ, dst, cv.TM_SQDIFF_NORMED, mask);
+    let result = cv.minMaxLoc(dst, mask);
+    let maxPoint = result.minLoc;
+    let color = new cv.Scalar(255, 0, 0, 255);
+    let point = new cv.Point(maxPoint.x + templ.cols, maxPoint.y + templ.rows);
+    cv.rectangle(src, maxPoint, point, color, 2, cv.LINE_8, 0);
+    cv.imshow(this.canvasNumber.nativeElement.id, src);
+    src.delete(); 
+    dst.delete(); 
+    mask.delete();
+  }
 
 
 }

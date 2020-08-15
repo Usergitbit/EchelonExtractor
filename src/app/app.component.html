@@ -2,13 +2,33 @@
 <img class="selected-image" [src]="image"> -->
 <canvas #canvasInput id="canvasInput"></canvas>
 <canvas #canvasOutput id="canvasOutput"></canvas>
+<canvas #canvasProcessed id="canvasProcessed"></canvas>
+<canvas #canvasSelected id="canvasSelected"></canvas>
+<canvas #canvasGray id="canvasGray"></canvas>
+<canvas #canvasNumber id="canvasNumber"></canvas>
+<canvas #canvasTemplate id="canvasTemplate"></canvas>
 
 <div class="caption">
-    canvasInput
-    <input (change)="readDataUrl($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" />
+  canvasInput
+  <input (change)="readDataUrl($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" />
+</div>
+
+<div class="caption">
+  canvasTemplate
+  <input (change)="readTemplateDataUrl($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" />
 </div>
 
 <div>
-    <div class="control"><button id="tryIt" (click)="detectFace()" [disabled]="!(classifiersLoaded$ | async)">Detect Face</button></div>
+  <div class="control">
+    <button id="tryIt" (click)="detectShapes()" [disabled]="!(classifiersLoaded$ | async)">
+      DetectShapes
+    </button>
   </div>
+
+  <div class="control">
+    <button id="tryIt" (click)="findNumber()" [disabled]="!(classifiersLoaded$ | async)">
+      Find Number by template
+    </button>
+  </div>
+</div>
 <router-outlet></router-outlet>
