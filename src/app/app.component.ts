@@ -311,12 +311,12 @@ export class AppComponent {
     let result = cv.Mat.ones(rows, cols, copied.get(0).type());
 
     let start = 0;
-    let stop = copied.get(0).rows;
-    for (let i = 0; i < copied.size(); i++) {
+    let stop = copied.get(copied.size() - 1).rows;
+    for (let i = copied.size() - 1; i >= 0 ; i--) {
       copied.get(i).copyTo(result.rowRange(start, stop).colRange(0, cols));
-      if (i < copied.size() - 1) {
+      if (i != 0) {
         start = stop;
-        stop = stop + copied.get(i + 1).rows;
+        stop = stop + copied.get(i - 1).rows;
       }
     }
 
