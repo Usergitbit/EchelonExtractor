@@ -2,6 +2,7 @@ import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { Observable, BehaviorSubject, forkJoin, fromEvent } from 'rxjs';
 import { tap, switchMap, filter, combineAll } from 'rxjs/operators';
+import { RecursiveTemplateAstVisitor } from '@angular/compiler';
 
 @Component({
   selector: 'app-root',
@@ -253,12 +254,6 @@ export class AppComponent {
   }
 
   public detectShapes(): void {
-    // const sourceImage =  cv.imread(this.canvasInput.nativeElement.id);
-    // const grayScaledImage = new cv.Mat();
-    // cv.cvtColor(sourceImage, grayScaledImage, cv.COLOR_RGBA2GRAY);
-    // const thresholded = new cv.Mat();
-    // cv.adaptiveThreshold(grayScaledImage, thresholded, 200, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 3, 2);
-    // cv.imshow(this.canvasOutput.nativeElement.id, thresholded);
     let initial = cv.imread(this.canvasInput.nativeElement.id);
     let src = cv.imread(this.canvasInput.nativeElement.id);
     let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
@@ -275,7 +270,9 @@ export class AppComponent {
     let hierarchy = new cv.Mat();
     cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
 
-    let copied;
+    let copied = new cv.MatVector();
+    let cols: Number = 0; 
+    let rows: Number = 0;
 
     for (let i = 0; i < contours.size(); ++i) {
       let cnt = contours.get(i);
@@ -285,7 +282,6 @@ export class AppComponent {
 
       let rect = cv.boundingRect(cnt);
       const aspectRatio = rect.width / rect.height;
-      //if (rect.width > 960 && rect.height > 15 && rect.height < rect.width && rect.height < 200) {
       if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
         console.log(`${i} : Width:${rect.width} Height:${rect.height}`);
         let contoursColor = new cv.Scalar(255, 255, 255);
@@ -295,29 +291,46 @@ export class AppComponent {
         let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
         cv.rectangle(dst, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
 
-        if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100)
-          copied = initial.roi(rect);
+        if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
+          let resultMat = initial.roi(rect);
+          copied.push_back(resultMat);
 
-
-
+          if (resultMat.cols > cols)
+            cols = resultMat.cols;
+          rows += resultMat.rows;
+        }
 
         cnt.delete();
       }
-
-
-
     }
 
     if (this.debug)
       cv.imshow(this.canvasOutput.nativeElement.id, dst);
-    cv.imshow(this.canvasSelected.nativeElement.id, copied);
+
+
+    let result = cv.Mat.ones(rows, cols, copied.get(0).type());
+
+    let start = 0;
+    let stop = copied.get(0).rows;
+    for (let i = 0; i < copied.size(); i++) {
+      copied.get(i).copyTo(result.rowRange(start, stop).colRange(0, cols));
+      if (i < copied.size() - 1) {
+        start = stop;
+        stop = stop + copied.get(i + 1).rows;
+      }
+    }
+
+
+    cv.imshow(this.canvasSelected.nativeElement.id, result);
 
     contours.delete(); hierarchy.delete();
 
     src.delete();
     dst.delete();
     initial.delete();
-    copied.delete();
+    for (let i = 0; i < copied.size(); i++) {
+      copied.get(i).delete();
+    }
 
   }
 
@@ -333,8 +346,8 @@ export class AppComponent {
     let point = new cv.Point(maxPoint.x + templ.cols, maxPoint.y + templ.rows);
     cv.rectangle(src, maxPoint, point, color, 2, cv.LINE_8, 0);
     cv.imshow(this.canvasNumber.nativeElement.id, src);
-    src.delete(); 
-    dst.delete(); 
+    src.delete();
+    dst.delete();
     mask.delete();
   }
 
