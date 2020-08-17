@@ -6,9 +6,9 @@
   class="selected-image-canvas"></canvas>
 
 <div class="caption">
-  canvasInput
-  <input (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*"
+  <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" #imgFileInput
     multiple="true" />
+    <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()">Add a photo</button>
 </div>
 
 <div>
