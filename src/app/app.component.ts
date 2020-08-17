@@ -76,11 +76,11 @@ export class AppComponent implements AfterViewInit {
       let img = new Image();
 
       img.onload = (img) => {
-        let canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement;
+        let canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement as HTMLCanvasElement;
         let context = canvas?.getContext("2d");
         let image = img.target as HTMLImageElement;
-        (canvas as HTMLCanvasElement).width = image.naturalWidth;
-        (canvas as HTMLCanvasElement).height = image.naturalHeight;
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
         context?.drawImage(image, 0, 0);
       }
 
