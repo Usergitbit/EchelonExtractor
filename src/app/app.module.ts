@@ -8,6 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgOpenCVModule, OpenCVOptions } from 'ng-open-cv';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { CanvasSelectorDirective } from './canvas-selector.directive';
 
 const openCVConfig: OpenCVOptions = {
   scriptUrl: `assets/opencv/wasm/3.4/opencv.js`,
@@ -17,7 +18,8 @@ const openCVConfig: OpenCVOptions = {
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CanvasSelectorDirective
   ],
   imports: [
     BrowserModule,

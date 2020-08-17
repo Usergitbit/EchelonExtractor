@@ -1,20 +1,17 @@
-import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { Observable, BehaviorSubject, forkJoin, fromEvent } from 'rxjs';
 import { tap, switchMap, filter, combineAll } from 'rxjs/operators';
-import { RecursiveTemplateAstVisitor } from '@angular/compiler';
+import { CanvasSelectorDirective } from './canvas-selector.directive';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
   title = 'EchelonExtractor';
-  imageUrl: string = "";
 
-  @ViewChild('fileInput')
-  fileInput!: ElementRef;
   @ViewChild('canvasInput')
   canvasInput!: ElementRef;
   @ViewChild('canvasOutput')
@@ -25,15 +22,16 @@ export class AppComponent {
   canvasProcessed!: ElementRef;
   @ViewChild('canvasGray')
   canvasGray!: ElementRef;
-  @ViewChild('canvasNumber')
-  canvasNumber!: ElementRef;
-  @ViewChild('canvasTemplate')
-  canvasTemplate!: ElementRef;
 
-  private debug: boolean = false;
+  @ViewChildren('canvasSelector')
+  selectedImagesCanvasesQueryList!: QueryList<ElementRef>;
+
+  public debug: boolean = false;
 
   private classifiersLoaded = new BehaviorSubject<boolean>(false);
   classifiersLoaded$ = this.classifiersLoaded.asObservable();
+
+  public files = new Array<string>();
 
 
   public image: any;
@@ -42,24 +40,54 @@ export class AppComponent {
   constructor(private ngOpenCVService: NgOpenCVService) {
   }
 
-  public onFileSelected(target: EventTarget | null): void {
+  public ngAfterViewInit(): void {
+    // Here we just load our example image to the canvas
+    this.selectedImagesCanvasesQueryList.changes.subscribe(data => {
+      console.log(data);
+    })
+  }
 
+  public onFileSelected(target: EventTarget | null): void {
+    this.files = [];
     let value = target as HTMLInputElement;
     let file: File;
     if (value == null || value.files == null || value.files.length == 0)
       return;
     else
-      file = value.files[0];
+      for (let i = 0; i < value.files.length; i++) {
+        const file = value.files[i];
+        this.files.push(file.name);
+        const fileReader: FileReader = new FileReader();
 
-    var fileReader: FileReader = new FileReader();
+        const load$ = fromEvent<ProgressEvent<FileReader>>(fileReader, 'loadend');
 
-    fileReader.onloadend = this.loadImageClassic.bind(this);
-    fileReader.readAsDataURL(file);
+        load$.subscribe(result => {
+          this.loadImageClassic(result, file.name);
+        });
+
+        fileReader.readAsDataURL(file);
+      }
+
+
   }
 
-  private loadImageClassic(data: ProgressEvent<FileReader>): void {
-    if (data != null && data.target != null)
-      this.image = data.target.result;
+  private loadImageClassic(data: ProgressEvent<FileReader>, fileName: string): void {
+    if (data != null && data.target != null) {
+      let img = new Image();
+
+      img.onload = (img) => {
+        let canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement;
+        let context = canvas?.getContext("2d");
+        let image = img.target as HTMLImageElement;
+        (canvas as HTMLCanvasElement).width = image.naturalWidth;
+        (canvas as HTMLCanvasElement).height = image.naturalHeight;
+        context?.drawImage(image, 0, 0);
+      }
+
+      img.src = data.target.result as string;
+
+
+    }
   }
 
   ngOnInit() {
@@ -80,17 +108,7 @@ export class AppComponent {
       });
   }
 
-  ngAfterViewInit(): void {
-    // Here we just load our example image to the canvas
-    this.ngOpenCVService.isReady$
-      .pipe(
-        filter((result: OpenCVLoadResult) => result.ready),
-        tap((result: OpenCVLoadResult) => {
-          this.ngOpenCVService.loadImageToHTMLCanvas(this.imageUrl, this.canvasInput.nativeElement).subscribe();
-        })
-      )
-      .subscribe(() => { });
-  }
+
 
   readDataUrl(eventTarget: EventTarget | null) {
 
@@ -117,25 +135,25 @@ export class AppComponent {
 
   readTemplateDataUrl(eventTarget: EventTarget | null) {
 
-    let fileInput = eventTarget as HTMLInputElement;
+    // let fileInput = eventTarget as HTMLInputElement;
 
-    if (fileInput?.files?.length) {
-      const reader = new FileReader();
-      const load$ = fromEvent(reader, 'load');
-      load$
-        .pipe(
-          switchMap(() => {
-            return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasTemplate.nativeElement);
-          })
-        )
-        .subscribe(
-          () => { },
-          err => {
-            console.log('Error loading image', err);
-          }
-        );
-      reader.readAsDataURL(fileInput.files[0]);
-    }
+    // if (fileInput?.files?.length) {
+    //   const reader = new FileReader();
+    //   const load$ = fromEvent(reader, 'load');
+    //   load$
+    //     .pipe(
+    //       switchMap(() => {
+    //         return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasTemplate.nativeElement);
+    //       })
+    //     )
+    //     .subscribe(
+    //       () => { },
+    //       err => {
+    //         console.log('Error loading image', err);
+    //       }
+    //     );
+    //   reader.readAsDataURL(fileInput.files[0]);
+    // }
   }
 
   private loadImage(eventTarget: EventTarget | null) {
@@ -271,7 +289,7 @@ export class AppComponent {
     cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
 
     let copied = new cv.MatVector();
-    let cols: Number = 0; 
+    let cols: Number = 0;
     let rows: Number = 0;
 
     for (let i = 0; i < contours.size(); ++i) {
@@ -312,7 +330,7 @@ export class AppComponent {
 
     let start = 0;
     let stop = copied.get(copied.size() - 1).rows;
-    for (let i = copied.size() - 1; i >= 0 ; i--) {
+    for (let i = copied.size() - 1; i >= 0; i--) {
       copied.get(i).copyTo(result.rowRange(start, stop).colRange(0, cols));
       if (i != 0) {
         start = stop;
@@ -335,20 +353,20 @@ export class AppComponent {
   }
 
   public findNumber(): void {
-    let src = cv.imread(this.canvasInput.nativeElement.id);
-    let templ = cv.imread(this.canvasTemplate.nativeElement.id);
-    let dst = new cv.Mat();
-    let mask = new cv.Mat();
-    cv.matchTemplate(src, templ, dst, cv.TM_SQDIFF_NORMED, mask);
-    let result = cv.minMaxLoc(dst, mask);
-    let maxPoint = result.minLoc;
-    let color = new cv.Scalar(255, 0, 0, 255);
-    let point = new cv.Point(maxPoint.x + templ.cols, maxPoint.y + templ.rows);
-    cv.rectangle(src, maxPoint, point, color, 2, cv.LINE_8, 0);
-    cv.imshow(this.canvasNumber.nativeElement.id, src);
-    src.delete();
-    dst.delete();
-    mask.delete();
+    // let src = cv.imread(this.canvasInput.nativeElement.id);
+    // let templ = cv.imread(this.canvasTemplate.nativeElement.id);
+    // let dst = new cv.Mat();
+    // let mask = new cv.Mat();
+    // cv.matchTemplate(src, templ, dst, cv.TM_SQDIFF_NORMED, mask);
+    // let result = cv.minMaxLoc(dst, mask);
+    // let maxPoint = result.minLoc;
+    // let color = new cv.Scalar(255, 0, 0, 255);
+    // let point = new cv.Point(maxPoint.x + templ.cols, maxPoint.y + templ.rows);
+    // cv.rectangle(src, maxPoint, point, color, 2, cv.LINE_8, 0);
+    // cv.imshow(this.canvasNumber.nativeElement.id, src);
+    // src.delete();
+    // dst.delete();
+    // mask.delete();
   }
 
 

@@ -2,3 +2,9 @@
     max-width: 50%;
     height: auto;
 }
+
+.selected-image-canvas {
+    min-width: 100%;
+    min-height: 100%;
+    overflow: scroll;
+}
