@@ -4,7 +4,21 @@
 }
 
 .selected-image-canvas {
-    min-width: 100%;
-    min-height: 100%;
+    max-width: 800px;
+    max-height: 100%;
     overflow: scroll;
+}
+
+.echelon-canvas {
+    max-width: 600px;
+    max-height: 100%;
+    overflow: scroll;
+}
+
+.checkbox-margin {
+    margin-right: 10px;
+}
+
+.card-margin {
+    margin: 10px;
 }

@@ -1,8 +1,7 @@
-import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides, ChangeDetectorRef } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
-import { Observable, BehaviorSubject, forkJoin, fromEvent } from 'rxjs';
-import { tap, switchMap, filter, combineAll } from 'rxjs/operators';
-import { CanvasSelectorDirective } from './canvas-selector.directive';
+import { Observable, BehaviorSubject, forkJoin, fromEvent, Subscription } from 'rxjs';
+import { tap, switchMap, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +23,10 @@ export class AppComponent implements AfterViewInit {
   canvasGray!: ElementRef;
 
   @ViewChildren('canvasSelector')
-  selectedImagesCanvasesQueryList!: QueryList<ElementRef>;
+  selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
+
+  @ViewChildren('echelonCanvasSelector')
+  extractedEchelonsCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
 
   public debug: boolean = false;
 
@@ -32,25 +34,22 @@ export class AppComponent implements AfterViewInit {
   classifiersLoaded$ = this.classifiersLoaded.asObservable();
 
   public files = new Array<string>();
+  public extractedEchelons = new Array<string>();
 
 
   public image: any;
   public openCVLoadResult!: Observable<OpenCVLoadResult>;
 
-  constructor(private ngOpenCVService: NgOpenCVService) {
+  constructor(private ngOpenCVService: NgOpenCVService, private changeDetector: ChangeDetectorRef) {
+
   }
 
   public ngAfterViewInit(): void {
-    // Here we just load our example image to the canvas
-    this.selectedImagesCanvasesQueryList.changes.subscribe(data => {
-      console.log(data);
-    })
   }
 
   public onFileSelected(target: EventTarget | null): void {
     this.files = [];
     let value = target as HTMLInputElement;
-    let file: File;
     if (value == null || value.files == null || value.files.length == 0)
       return;
     else
@@ -62,7 +61,7 @@ export class AppComponent implements AfterViewInit {
         const load$ = fromEvent<ProgressEvent<FileReader>>(fileReader, 'loadend');
 
         load$.subscribe(result => {
-          this.loadImageClassic(result, file.name);
+          this.loadImageToCanvas(result, file.name);
         });
 
         fileReader.readAsDataURL(file);
@@ -71,16 +70,19 @@ export class AppComponent implements AfterViewInit {
 
   }
 
-  private loadImageClassic(data: ProgressEvent<FileReader>, fileName: string): void {
+  private loadImageToCanvas(data: ProgressEvent<FileReader>, fileName: string): void {
     if (data != null && data.target != null) {
       let img = new Image();
 
       img.onload = (img) => {
-        let canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement as HTMLCanvasElement;
+        let canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement;
         let context = canvas?.getContext("2d");
         let image = img.target as HTMLImageElement;
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
+
+        if (canvas) {
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+        }
         context?.drawImage(image, 0, 0);
       }
 
@@ -99,6 +101,7 @@ export class AppComponent implements AfterViewInit {
         filter((result: OpenCVLoadResult) => result.ready),
         switchMap(() => {
           // Load the face and eye classifiers files
+          this.allEchelons = new cv.MatVector();
           return this.loadClassifiers();
         })
       )
@@ -269,6 +272,88 @@ export class AppComponent implements AfterViewInit {
     cv.imshow(this.canvasOutput.nativeElement.id, grayScaledImage);
     sourceImage.delete();
     grayScaledImage.delete();
+  }
+
+  private allEchelons: any;
+  private subscription!: Subscription;
+
+  public extractAllEchelons(): void {
+
+    this.allEchelons.delete();
+    this.allEchelons = new cv.MatVector();
+    this.extractedEchelons = [];
+    this.changeDetector.detectChanges();
+
+    this.files.forEach(file => {
+      let imageEchelons = this.extractImageEchelons(file);
+      for (let i = imageEchelons.size() - 1; i >= 0; i--)
+        this.allEchelons.push_back(imageEchelons.get(i));
+      imageEchelons.delete();
+    });
+
+    this.subscription?.unsubscribe();
+    this.subscription = this.extractedEchelonsCanvasesQueryList.changes.subscribe((data: QueryList<ElementRef<HTMLCanvasElement>>) => {
+      for (let i = 0; i < data.length; i++) {
+        this.loadMatToEchelonCanvas(this.allEchelons.get(i), i.toString());
+        this.allEchelons.get(i).delete();
+      }
+    });
+
+    for (let i = 0; i < this.allEchelons.size(); i++) {
+      this.extractedEchelons.push(i.toString());
+    }
+  }
+
+  //should return mat vector with all extracted echelons
+  private extractImageEchelons(fileName: string): any {
+    let initial = cv.imread(fileName);
+    let src = cv.imread(fileName);
+    let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+
+    cv.threshold(src, src, 50, 250, cv.THRESH_BINARY);
+
+    let contours = new cv.MatVector();
+
+    let hierarchy = new cv.Mat();
+
+    cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+
+    let result = new cv.MatVector();
+
+    for (let i = 0; i < contours.size(); ++i) {
+      let cnt = contours.get(i);
+      let approx = new cv.Mat();
+      let peri = cv.arcLength(cnt, true);
+      cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
+
+      let rect = cv.boundingRect(cnt);
+      const aspectRatio = rect.width / rect.height;
+      if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
+        console.log(`${i} : Width:${rect.width} Height:${rect.height}`);
+        let contoursColor = new cv.Scalar(255, 255, 255);
+        let rectangleColor = new cv.Scalar(255, 0, 0);
+        cv.drawContours(dst, contours, 0, contoursColor, 1, 8, hierarchy, 100);
+        let point1 = new cv.Point(rect.x, rect.y);
+        let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+        cv.rectangle(dst, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
+
+        if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
+          let resultMat = initial.roi(rect);
+          result.push_back(resultMat);
+        }
+
+        cnt.delete();
+        approx.delete();
+      }
+    }
+
+    return result;
+  }
+
+  private loadMatToEchelonCanvas(mat: any, canvasId: string): void {
+    cv.imshow(canvasId, mat);
   }
 
   public detectShapes(): void {

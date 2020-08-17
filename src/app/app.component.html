@@ -1,22 +1,29 @@
-<canvas #canvasInput id="canvasInput"></canvas>
 <canvas *ngIf=debug #canvasOutput id="canvasOutput"></canvas>
 <canvas *ngIf=debug #canvasGray id="canvasGray"></canvas>
 <canvas *ngIf=debug #canvasProcessed id="canvasProcessed"></canvas>
-<canvas #canvasSelected id="canvasSelected"></canvas>
 
-<canvas *ngFor="let fileName of files; index as i"  title={{fileName}} #canvasSelector class="selected-image-canvas"></canvas>
+<canvas *ngFor="let fileName of files" id={{fileName}} title={{fileName}} #canvasSelector
+  class="selected-image-canvas"></canvas>
 
 <div class="caption">
   canvasInput
-  <input (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" multiple="true" />
+  <input (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*"
+    multiple="true" />
 </div>
 
 <div>
   <div class="control">
-    <button id="tryIt" (click)="detectShapes()" [disabled]="!(classifiersLoaded$ | async)">
-      DetectShapes
+    <button mat-raised-button color="primary" id="tryIt" (click)="extractAllEchelons()" [disabled]="!(classifiersLoaded$ | async)">
+      Extract Echelons
     </button>
   </div>
 
 </div>
-<router-outlet></router-outlet>
+<div *ngFor="let echelon of extractedEchelons">
+  <mat-card class="card-margin">
+    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>
+      <mat-checkbox class="checkbox-margin" color="primary"></mat-checkbox>
+      <canvas id={{echelon}} #echelonCanvasSelector class="echelon-canvas"></canvas>
+    </div>
+  </mat-card>
+</div>
