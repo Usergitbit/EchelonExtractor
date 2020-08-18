@@ -154,6 +154,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     for (let i = 0; i < this.allEchelons.size(); i++) {
       this.extractedEchelons.push(i.toString());
     }
+    this.changeDetector.detectChanges();
   }
 
   //should return mat vector with all extracted echelons
