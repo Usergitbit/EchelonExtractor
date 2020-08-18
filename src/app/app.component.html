@@ -8,14 +8,14 @@
 <div class="caption">
   <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
     accept="image/*" #imgFileInput multiple="true" />
-  <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()">Add a
+  <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()" class="button-margin">Add a
     screenshot</button>
 </div>
 
 <div>
   <div class="control">
     <div >
-      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" [disabled]="!isReady">
+      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" [disabled]="!isReady" class="button-margin">
         Extract Echelons
       </button>
     </div>
