@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides, ChangeDetectorRef, OnInit } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { Observable, BehaviorSubject, forkJoin, fromEvent, Subscription } from 'rxjs';
 import { tap, switchMap, filter } from 'rxjs/operators';
@@ -8,7 +8,7 @@ import { tap, switchMap, filter } from 'rxjs/operators';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
 
   @ViewChild('canvasOutput')
   canvasOutput!: ElementRef;
@@ -32,6 +32,9 @@ export class AppComponent implements AfterViewInit {
   public extractedEchelons = new Array<string>();
 
   public openCVLoadResult!: Observable<OpenCVLoadResult>;
+
+  private allEchelons: any;
+  private subscription!: Subscription;
 
   constructor(private ngOpenCVService: NgOpenCVService, private changeDetector: ChangeDetectorRef) {
   }
@@ -84,24 +87,16 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private isReadySubject = new BehaviorSubject<boolean>(false);
-  get isReady$(): Observable<boolean> {
-    return this.isReadySubject.asObservable();
-  }
-  ngOnInit() {
+  public ngOnInit(): void {
     this.ngOpenCVService.isReady$
-      .pipe(
-        filter((result: OpenCVLoadResult) => result.ready)
-      ).subscribe(() => {
-        this.allEchelons = new cv.MatVector();
-        this.isReady = true;
-        this.changeDetector.detectChanges();
+      .subscribe((result: OpenCVLoadResult) => {
+        if (result.ready) {
+          this.allEchelons = new cv.MatVector();
+          this.isReady = true;
+          this.changeDetector.detectChanges();
+        }
       });
   }
-
-
-
-
 
   readTemplateDataUrl(eventTarget: EventTarget | null) {
 
@@ -126,7 +121,6 @@ export class AppComponent implements AfterViewInit {
     // }
   }
 
-
   public grayScale(): void {
     // const sourceImage = cv.imread(this.canvasInput.nativeElement.id);
     // const grayScaledImage = new cv.Mat();
@@ -136,11 +130,7 @@ export class AppComponent implements AfterViewInit {
     // grayScaledImage.delete();
   }
 
-  private allEchelons: any;
-  private subscription!: Subscription;
-
   public extractAllEchelons(): void {
-
     this.allEchelons.delete();
     this.allEchelons = new cv.MatVector();
     this.extractedEchelons = [];
@@ -315,6 +305,5 @@ export class AppComponent implements AfterViewInit {
     // dst.delete();
     // mask.delete();
   }
-
 
 }

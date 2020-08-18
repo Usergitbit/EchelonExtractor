@@ -6,16 +6,22 @@
   class="selected-image-canvas"></canvas>
 
 <div class="caption">
-  <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file" accept="image/*" #imgFileInput
-    multiple="true" />
-    <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()">Add a screenshot</button>
+  <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
+    accept="image/*" #imgFileInput multiple="true" />
+  <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()">Add a
+    screenshot</button>
 </div>
 
 <div>
   <div class="control">
-    <button mat-raised-button color="primary" (click)="extractAllEchelons()" [disabled]="!isReady">
-      Extract Echelons
-    </button>
+    <div *ngIf="isReady; else loading">
+      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()">
+        Extract Echelons
+      </button>
+    </div>
+    <ng-template #loading>
+      <mat-spinner ></mat-spinner>
+    </ng-template>
   </div>
 
 </div>
