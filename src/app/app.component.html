@@ -14,17 +14,14 @@
 
 <div>
   <div class="control">
-    <div *ngIf="isReady; else loading">
-      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()">
+    <div >
+      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" [disabled]="!isReady">
         Extract Echelons
       </button>
     </div>
-    <ng-template #loading>
-      <mat-spinner ></mat-spinner>
-    </ng-template>
-  </div>
-
+  </div> 
 </div>
+
 <div *ngFor="let echelon of extractedEchelons">
   <mat-card class="card-margin">
     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>

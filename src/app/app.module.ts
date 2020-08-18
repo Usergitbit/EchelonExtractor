@@ -25,14 +25,14 @@ const openCVConfig: OpenCVOptions = {
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgOpenCVModule.forRoot(openCVConfig),
     BrowserAnimationsModule,
     MatCardModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
     FlexLayoutModule,
     MatButtonModule,
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
+    NgOpenCVModule.forRoot(openCVConfig),
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewIni
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { Observable, BehaviorSubject, forkJoin, fromEvent, Subscription } from 'rxjs';
 import { tap, switchMap, filter } from 'rxjs/operators';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,8 @@ export class AppComponent implements AfterViewInit, OnInit {
   canvasProcessed!: ElementRef;
   @ViewChild('canvasGray')
   canvasGray!: ElementRef;
+  @ViewChild('extractButton', { read: ElementRef})
+  extractButton!: ElementRef<HTMLButtonElement>;
 
   @ViewChildren('canvasSelector')
   selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
@@ -27,6 +30,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   public debug: boolean = false;
 
   public isReady: boolean = false;
+ 
 
   public files = new Array<string>();
   public extractedEchelons = new Array<string>();
@@ -154,7 +158,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     for (let i = 0; i < this.allEchelons.size(); i++) {
       this.extractedEchelons.push(i.toString());
     }
-    this.changeDetector.detectChanges();
   }
 
   //should return mat vector with all extracted echelons
