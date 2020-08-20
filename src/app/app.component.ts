@@ -1,8 +1,6 @@
 import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides, ChangeDetectorRef, OnInit } from '@angular/core';
-import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
-import { Observable, BehaviorSubject, forkJoin, fromEvent, Subscription } from 'rxjs';
-import { tap, switchMap, filter } from 'rxjs/operators';
-import { MatButton } from '@angular/material/button';
+import { Observable, BehaviorSubject, fromEvent, Subscription } from 'rxjs';
+import { ImageProcessingService} from '../services/image-processing.service';
 
 @Component({
   selector: 'app-root',
@@ -35,12 +33,11 @@ export class AppComponent implements AfterViewInit, OnInit {
   public files = new Array<string>();
   public extractedEchelons = new Array<string>();
 
-  public openCVLoadResult!: Observable<OpenCVLoadResult>;
 
   private allEchelons: any;
   private subscription!: Subscription;
 
-  constructor(private ngOpenCVService: NgOpenCVService, private changeDetector: ChangeDetectorRef) {
+  constructor(private imageProcessingService: ImageProcessingService, private changeDetector: ChangeDetectorRef) {
   }
 
   public ngAfterViewInit(): void {
@@ -92,14 +89,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   public ngOnInit(): void {
-    this.ngOpenCVService.isReady$
-      .subscribe((result: OpenCVLoadResult) => {
-        if (result.ready) {
-          this.allEchelons = new cv.MatVector();
-          this.isReady = true;
-          this.changeDetector.detectChanges();
-        }
-      });
+
   }
 
   readTemplateDataUrl(eventTarget: EventTarget | null) {
@@ -126,12 +116,28 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   public grayScale(): void {
+
+    const canvas = this.selectedImagesCanvasesQueryList.first.nativeElement;
+    const ctx = canvas?.getContext("2d");
+
+
+    const imagedata = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+    if(imagedata){
+      this.imageProcessingService.imageData$.subscribe((data: ImageData) => {
+        if(ctx)
+          ctx.putImageData(data, 0, 0);
+      });
+      this.imageProcessingService.processImage(imagedata);
+    }
+    
     // const sourceImage = cv.imread(this.canvasInput.nativeElement.id);
     // const grayScaledImage = new cv.Mat();
     // cv.cvtColor(sourceImage, grayScaledImage, cv.COLOR_RGBA2GRAY);
     // cv.imshow(this.canvasOutput.nativeElement.id, grayScaledImage);
     // sourceImage.delete();
     // grayScaledImage.delete();
+
+
   }
 
   public extractAllEchelons(): void {
