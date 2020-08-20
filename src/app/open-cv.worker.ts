@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 declare var cv: any;
 
-import { IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerMessage } from "../models/WorkerModels";
+import { IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType } from "../models";
 
 export interface IModule extends WorkerGlobalScope {
   Module: any;
@@ -13,26 +13,30 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   console.log(`messageEvent.data is ${messageEvent.data}`);
   const data = messageEvent.data;
 
-  switch (data.message) {
-    case WorkerMessage.Load: {
+  switch (data.requestInformation.requestType) {
+    case WorkerRequestType.Load: {
       (self as unknown as IModule)["Module"] = {
         scriptUrl: 'assets/opencv/asm/3.4/opencv.js',
         wasmBinaryFile: 'assets/opencv/wasm/3.4/opencv_js.wasm',
         usingWasm: true,
         locateFile: locateFile,
         onRuntimeInitialized: () => {
-          postResponse({ message: WorkerMessage.LoadCompleted });
+          postResponse({ responseInformation: { responseType: WorkerResponseType.LoadCompleted, requestId: data.requestInformation.id } });
         }
       };
       // Import Webassembly script
       self.importScripts('./assets/opencv/wasm/3.4/opencv.js');
       break;
     }
-    case WorkerMessage.ProcessImage: {
+    case WorkerRequestType.ExtractEchelons: {
       if (!data.payload)
         throw new Error("Image payload must not be null or undefined");
       const result = grayscale(data.payload);
-      postResponse({ message: WorkerMessage.ProcessImageResult, payload: result })
+      for (let i = 0; i < 100; i++) {
+          console.log(i);
+      }
+
+      postResponse({ responseInformation: { responseType: WorkerResponseType.EchelonExtracted, requestId: data.requestInformation.id, requestCompleted: true }, payload: result });
 
       break;
     }

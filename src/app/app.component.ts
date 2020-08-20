@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides, ChangeDetectorRef, OnInit } from '@angular/core';
-import { Observable, BehaviorSubject, fromEvent, Subscription } from 'rxjs';
+import { Observable, fromEvent, Subscription } from 'rxjs';
 import { ImageProcessingService} from '../services/image-processing.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,9 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   public debug: boolean = false;
 
-  public isReady: boolean = false;
+  public get isReady$(): Observable<boolean> {
+    return this.imageProcessingService.isLoaded$;
+  }
  
 
   public files = new Array<string>();
@@ -62,8 +65,6 @@ export class AppComponent implements AfterViewInit, OnInit {
 
         fileReader.readAsDataURL(file);
       }
-
-
   }
 
   private loadImageToCanvas(data: ProgressEvent<FileReader>, fileName: string): void {
@@ -89,7 +90,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   public ngOnInit(): void {
-
   }
 
   readTemplateDataUrl(eventTarget: EventTarget | null) {
@@ -123,11 +123,12 @@ export class AppComponent implements AfterViewInit, OnInit {
 
     const imagedata = ctx?.getImageData(0, 0, canvas.width, canvas.height);
     if(imagedata){
-      this.imageProcessingService.imageData$.subscribe((data: ImageData) => {
+      this.imageProcessingService.extractEchelons(imagedata)
+      .pipe(filter(data => data.length != 0))
+      .subscribe(data => {
         if(ctx)
-          ctx.putImageData(data, 0, 0);
-      });
-      this.imageProcessingService.processImage(imagedata);
+          ctx.putImageData(data[0], 0, 0);
+      })
     }
     
     // const sourceImage = cv.imread(this.canvasInput.nativeElement.id);

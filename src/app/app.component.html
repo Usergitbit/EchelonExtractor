@@ -15,15 +15,21 @@
 <div>
   <div class="control">
     <div >
-      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" [disabled]="!isReady" class="button-margin">
+      <div *ngIf="(isReady$ | async); else isLoading;" >
+      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button-margin">
         Extract Echelons
       </button>
+    </div>
       <button mat-raised-button color="primary" type="button" (click)="grayScale()"  class="button-margin">
         Grayscale
       </button>
     </div>
   </div> 
 </div>
+
+<ng-template #isLoading>
+  <mat-spinner></mat-spinner>
+</ng-template>
 
 <div *ngFor="let echelon of extractedEchelons">
   <mat-card class="card-margin">
