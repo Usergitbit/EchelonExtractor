@@ -1,6 +1,7 @@
 import { IResponseInformation } from ".";
+import { IResponseContent } from './IResponseContent';
 
 export interface IWorkerResponseMessageData {
-    payload?: ImageData;
-    responseInformation: IResponseInformation;
+    content?: IResponseContent;
+    information: IResponseInformation;
 }

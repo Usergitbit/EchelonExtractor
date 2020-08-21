@@ -1,6 +1,7 @@
 import { IRequestInformation } from ".";
+import { IRequestContent } from './IRequestContent';
 
 export interface IWorkerRequestMessageData {
-    payload?: ImageData;
-    requestInformation: IRequestInformation;
+    content?: IRequestContent;
+    information: IRequestInformation;
 }

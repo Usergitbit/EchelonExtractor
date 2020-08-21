@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 declare var cv: any;
 
-import { IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType } from "../models";
+import { IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType, IRequestContent, IResponseContent, IResponseInformation } from "../models";
 
 export interface IModule extends WorkerGlobalScope {
   Module: any;
@@ -13,7 +13,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   console.log(`messageEvent.data is ${messageEvent.data}`);
   const data = messageEvent.data;
 
-  switch (data.requestInformation.requestType) {
+  switch (data.information.requestType) {
     case WorkerRequestType.Load: {
       (self as unknown as IModule)["Module"] = {
         scriptUrl: 'assets/opencv/asm/3.4/opencv.js',
@@ -21,7 +21,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
         usingWasm: true,
         locateFile: locateFile,
         onRuntimeInitialized: () => {
-          postResponse({ responseInformation: { responseType: WorkerResponseType.LoadCompleted, requestId: data.requestInformation.id } });
+          postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.id } });
         }
       };
       // Import Webassembly script
@@ -29,23 +29,34 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
       break;
     }
     case WorkerRequestType.ExtractEchelons: {
-      if (!data.payload)
-        throw new Error("Image payload must not be null or undefined");
-      const result = grayscale(data.payload);
-      for (let i = 0; i < 100; i++) {
-          console.log(i);
-      }
+      if (!data.content)
+        throw new Error("Image content must not be null or undefined");
 
-      postResponse({ responseInformation: { responseType: WorkerResponseType.EchelonExtracted, requestId: data.requestInformation.id, requestCompleted: true }, payload: result });
-
+      const result = grayscale(data.content);
+      const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id, true);
+      const responseContent = createResponseContent(result);
+      postResponse({ information: responseInformation, content: responseContent });
       break;
     }
     default: break;
   }
 });
 
-function postResponse(message: IWorkerResponseMessageData): void {
-  postMessage(message);
+
+
+function createResponseInformation(responseType: WorkerResponseType, requestId: number, requestCompleted?: boolean): IResponseInformation {
+  return { requestId: requestId, responseType: responseType, requestCompleted: requestCompleted };
+}
+
+function createResponseContent(imageData: ImageData): IResponseContent {
+  return { imageArrayBuffer: imageData.data.buffer, height: imageData.height, width: imageData.width };
+}
+
+function postResponse(response: IWorkerResponseMessageData): void {
+  if (response.content)
+    postMessage(response, [response.content?.imageArrayBuffer as ArrayBuffer]);
+  else
+    postMessage(response);
 }
 
 function locateFile(path: string, scriptDirectory: string): string {
@@ -57,20 +68,20 @@ function locateFile(path: string, scriptDirectory: string): string {
   }
 }
 
-function grayscale(payload: ImageData): ImageData {
-  const img = cv.matFromImageData(payload);
+function grayscale(content: IRequestContent): ImageData {
+  const requestImageData = new ImageData(new Uint8ClampedArray(content.imageArrayBuffer), content.width, content.height);
+  const mat = cv.matFromImageData(requestImageData);
   let result = new cv.Mat();
-  cv.cvtColor(img, result, cv.COLOR_BGR2GRAY)
-  const imageData = imageDataFromMat(result);
-  return imageData;
+  cv.cvtColor(mat, result, cv.COLOR_BGR2GRAY)
+  const grayscaleImageData = imageDataFromMat(result);
+  return grayscaleImageData;
 }
 
 function imageDataFromMat(mat: any): ImageData {
   // converts the mat type to cv.CV_8U
   const img = new cv.Mat()
   const depth = mat.type() % 8
-  const scale =
-    depth <= cv.CV_8S ? 1.0 : depth <= cv.CV_32S ? 1.0 / 256.0 : 255.0
+  const scale = depth <= cv.CV_8S ? 1.0 : depth <= cv.CV_32S ? 1.0 / 256.0 : 255.0
   const shift = depth === cv.CV_8S || depth === cv.CV_16S ? 128.0 : 0.0
   mat.convertTo(img, cv.CV_8U, scale, shift)
 

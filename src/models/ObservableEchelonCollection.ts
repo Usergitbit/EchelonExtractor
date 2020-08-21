@@ -1,5 +1,4 @@
-import { Subject, Observable, asapScheduler, BehaviorSubject, } from "rxjs";
-import { subscribeOn } from "rxjs/operators";
+import { Observable, BehaviorSubject, } from "rxjs";
 
 export class ObservableEchelonCollection {
     private echelonListSubject = new BehaviorSubject<Array<ImageData>>([]);
