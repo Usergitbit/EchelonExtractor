@@ -15,7 +15,7 @@
 <div>
   <div class="control">
     <div >
-      <div *ngIf="(isReady$ | async); else isLoading;" >
+      <div *ngIf="isReady; else isLoading;" >
       <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button-margin">
         Extract Echelons
       </button>

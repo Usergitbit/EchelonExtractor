@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject, Observable, queue } from 'rxjs';
+import {  BehaviorSubject, Observable } from 'rxjs';
 import { IWorkerResponseMessageEvent, IWorkerRequestMessageData, WorkerResponseType, WorkerRequestType, IRequestInformation, ObservableEchelonCollection, IWorkerResponseMessageData, IRequestContent } from "../models";
-import { RequiredValidator } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -11,29 +10,36 @@ export class ImageProcessingService {
   private id = 1;
   private worker!: Worker;
 
+
+  private hasBeenLoaded = false;
   private isLoadedSubject = new BehaviorSubject<boolean>(false);
-  public get isLoaded$(): Observable<boolean> {
-    return this.isLoadedSubject.asObservable();
-  }
 
   private requestObservableCollections = new Map<number, ObservableEchelonCollection>();
 
   constructor() {
+  }
+
+  public load(): Observable<boolean> {
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker('../app/open-cv.worker', { type: 'module' });
+      this.worker = new Worker('./open-cv.worker', { type: 'module' });
       this.worker.onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); }
       const request = this.createRequestInformation(WorkerRequestType.Load);
+      console.log("Sending load request.");
       this.postRequest({ information: request });
     }
     else {
       this.isLoadedSubject.error("Web workers are not supported. The application can not run on this browser");
+      console.log("Web workers not supported");
     }
+    return this.isLoadedSubject.asObservable();
   }
+
   private handleResponseMessage(data: IWorkerResponseMessageData): void {
     switch (data.information.responseType) {
       case WorkerResponseType.LoadCompleted: {
         console.log("OpenCV has been loaded.");
         this.isLoadedSubject.next(true);
+        this.hasBeenLoaded = true;
         break;
       }
       case WorkerResponseType.EchelonExtracted:
@@ -63,8 +69,6 @@ export class ImageProcessingService {
     }
   }
 
-
-
   public extractEchelons(image: ImageData): Observable<Array<ImageData>> {
 
     if (!image || !image.data)
@@ -79,7 +83,6 @@ export class ImageProcessingService {
 
     return observableEchelonCollection.echelonsObservable;
   }
-
 
   private createRequestInformation(requestTypeParameter: WorkerRequestType): IRequestInformation {
     const requestId = this.id++;

@@ -8,13 +8,11 @@ export interface IModule extends WorkerGlobalScope {
 }
 
 addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
-
-  console.log(`messageEvent is ${messageEvent}`);
-  console.log(`messageEvent.data is ${messageEvent.data}`);
   const data = messageEvent.data;
 
   switch (data.information.requestType) {
     case WorkerRequestType.Load: {
+      console.log("Recieved load request");
       (self as unknown as IModule)["Module"] = {
         scriptUrl: 'assets/opencv/asm/3.4/opencv.js',
         wasmBinaryFile: 'assets/opencv/wasm/3.4/opencv_js.wasm',
