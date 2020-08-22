@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { fromEvent, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImageProcessingService } from '../services/image-processing.service';
@@ -22,7 +22,7 @@ export class AppComponent implements AfterViewInit {
   public files = new Array<string>();
   public extractedEchelons = new Array<Echelon>();
 
-  constructor(private imageProcessingService: ImageProcessingService, private changeDetector: ChangeDetectorRef) {
+  constructor(private imageProcessingService: ImageProcessingService) {
   }
 
   public ngAfterViewInit(): void {
