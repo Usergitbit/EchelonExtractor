@@ -27,4 +27,8 @@ export class EchelonCanvasComponent implements AfterViewInit {
     }
   }
 
+  public onCheckedChanged() {
+    this.echelon.isSelected = !this.echelon.isSelected;
+  }
+
 }

@@ -1,5 +1,5 @@
 export enum WorkerResponseType {
     LoadCompleted,
     EchelonExtracted,
-    ImageResult
+    EchelonsCombined
 }

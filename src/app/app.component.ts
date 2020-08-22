@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit, ViewChild } from '@angular/core';
 import { fromEvent, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImageProcessingService } from './services/image-processing.service';
@@ -13,6 +13,8 @@ export class AppComponent implements AfterViewInit {
 
   @ViewChildren('canvasSelector')
   private selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
+  @ViewChild('resultCanvas')
+  private resultCanvasElementRef!: ElementRef<HTMLCanvasElement>;
 
   public isReady = false;
   public isWorking = false;
@@ -94,5 +96,19 @@ export class AppComponent implements AfterViewInit {
         error => {
           console.log(error);
         });
+  }
+
+  public combineSelectedEchelons(): void {
+    const selectedEchelons = this.extractedEchelons.filter(echelon => echelon.isSelected);
+    const imagesData = selectedEchelons.map(echelon => echelon.imageData);
+    this.extractedEchelons = [];
+    this.imageProcessingService.combineEchelons(imagesData)
+      .subscribe(data => {
+        const canvas = this.resultCanvasElementRef.nativeElement;
+        canvas.width = data.width;
+        canvas.height = data.height;
+        const context = canvas.getContext("2d");
+        context?.putImageData(data, 0, 0);
+      });
   }
 }

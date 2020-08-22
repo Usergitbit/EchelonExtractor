@@ -9,23 +9,30 @@
 </div>
 
 <div>
-  <div class="control">
-    <div>
-      <div *ngIf="isReady; else isLoading;">
-        <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button-margin">
-          Extract Echelons
-        </button>
-      </div>
-    </div>
+  <div *ngIf="isReady; else isLoading;">
+    <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button-margin"
+      [disabled]="(files.length ==0)">
+      Extract Echelons
+    </button>
+  </div>
+  <div>
+    <button mat-raised-button color="primary" type="button" (click)="combineSelectedEchelons()"
+      [disabled]="(extractedEchelons.length == 0)" class="button-margin">
+      Combine echelons
+    </button>
+  </div>
+</div>
 
-    <ng-template #isLoading>
-      <mat-spinner></mat-spinner>
-    </ng-template>
+<ng-template #isLoading>
+  <mat-spinner></mat-spinner>
+</ng-template>
 
-    <mat-spinner *ngIf="isWorking"></mat-spinner>
+<mat-spinner *ngIf="isWorking"></mat-spinner>
 
-    <div fxFlex>
-      <div *ngFor="let echelon of extractedEchelons">
-        <app-echelon-canvas [echelon]="echelon"></app-echelon-canvas>
-      </div>
-    </div>
+<canvas #resultCanvas></canvas>
+
+<div fxFlex>
+  <div *ngFor="let echelon of extractedEchelons">
+    <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
+  </div>
+</div>
