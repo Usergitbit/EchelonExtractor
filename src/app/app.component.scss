@@ -1,14 +1,44 @@
+:host {
+    width: 100%;
+    display: block !important;
+}
+
 .selected-image {
     max-width: 50%;
     height: auto;
 }
 
 .selected-image-canvas {
-    max-width: 800px;
+    max-width: 300px;
     max-height: 100%;
-    overflow: scroll;
 }
 
-.button-margin {
-    margin: 10px;
+.button {
+    min-width: 150px;
 }
+
+
+
+
+
+.toolbar {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    background-color: #1976d2;
+    color: white;
+    font-weight: 600;
+  }
+
+  .toolbar img {
+    margin: 0 16px;
+  }
+
+  .toolbar #twitter-logo {
+    height: 40px;
+    margin: 0 16px;
+  }
+
+  .toolbar #twitter-logo:hover {
+    opacity: 0.8;
+  }
