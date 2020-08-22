@@ -1,3 +1,4 @@
+export * from "./IImage";
 export * from "./WorkerRequestType";
 export * from "./IRequestContent";
 export * from "./IRequestInformation";
@@ -8,7 +9,6 @@ export * from "./IResponseContent";
 export * from "./IResponseInformation";
 export * from "./IWorkerResponseMessageData";
 export * from "./IWorkerResponseMessageEvent";
-export * from "./ObservableEchelonCollection";
 export * from "./Echelon";
 
 

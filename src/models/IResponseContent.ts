@@ -1,5 +1,5 @@
+import { IImage } from './IImage';
+
 export interface IResponseContent {
-    imageArrayBuffer: ArrayBuffer;
-    width: number;
-    height: number;
+    images: Array<IImage>;
 }

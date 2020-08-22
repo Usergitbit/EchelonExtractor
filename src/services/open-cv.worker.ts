@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 declare var cv: any;
 
-import { IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType, IRequestContent, IResponseContent, IResponseInformation } from "../models";
+import { IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType, IRequestContent, IResponseContent, IResponseInformation, IImage } from "../models";
 
 export interface IModule extends WorkerGlobalScope {
   Module: any;
@@ -30,23 +30,28 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
       if (!data.content)
         throw new Error("Image content must not be null or undefined");
 
-      const result = extractEchelons(data.content);
-      let completed = result.length == 0;
-      for (let i = 0; i < result.length; i++) {
-        completed = (i == result.length - 1);
-        const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id, completed);
-        const responseContent = createResponseContent(result[i]);
-        postResponse({ information: responseInformation, content: responseContent });
+      const images = data.content.images;
+      let extractedEchelons = new Array<ImageData>();
+
+      for (let i = 0; i < images.length; i++) {
+        const results = extractEchelons(images[i]);
+        results.forEach(result => {
+          extractedEchelons.push(result);
+        });
       }
+
+      const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id, true);
+      const responseContent = createResponseContent(extractedEchelons);
+      postResponse({ information: responseInformation, content: responseContent });
       break;
     }
     default: break;
   }
 });
 
-function extractEchelons(content: IRequestContent): Array<ImageData> {
+function extractEchelons(image: IImage): Array<ImageData> {
 
-  const imageData = new ImageData(new Uint8ClampedArray(content.imageArrayBuffer), content.width, content.height);
+  const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
   const initialMat = cv.matFromImageData(imageData);
   let sourceMat = cv.matFromImageData(imageData);
   let destinationMat = cv.Mat.zeros(sourceMat.rows, sourceMat.cols, cv.CV_8UC3);
@@ -102,13 +107,19 @@ function createResponseInformation(responseType: WorkerResponseType, requestId: 
   return { requestId: requestId, responseType: responseType, requestCompleted: requestCompleted };
 }
 
-function createResponseContent(imageData: ImageData): IResponseContent {
-  return { imageArrayBuffer: imageData.data.buffer, height: imageData.height, width: imageData.width };
+function createResponseContent(imageData: Array<ImageData>): IResponseContent {
+  let responseImages = new Array<IImage>();
+  imageData.forEach(imageData => {
+    responseImages.push({ imageArrayBuffer: imageData.data.buffer, height: imageData.height, width: imageData.width });
+  });
+  return { images: responseImages };
 }
 
 function postResponse(response: IWorkerResponseMessageData): void {
-  if (response.content)
-    postMessage(response, [response.content?.imageArrayBuffer as ArrayBuffer]);
+  if (response.content) {
+    const arrayBuffers = response.content.images.map(image => image.imageArrayBuffer);
+    postMessage(response, arrayBuffers);
+  }
   else
     postMessage(response);
 }
@@ -120,15 +131,6 @@ function locateFile(path: string, scriptDirectory: string): string {
   else {
     return scriptDirectory + path;
   }
-}
-
-function grayscale(content: IRequestContent): ImageData {
-  const requestImageData = new ImageData(new Uint8ClampedArray(content.imageArrayBuffer), content.width, content.height);
-  const mat = cv.matFromImageData(requestImageData);
-  let result = new cv.Mat();
-  cv.cvtColor(mat, result, cv.COLOR_BGR2GRAY)
-  const grayscaleImageData = imageDataFromMat(result);
-  return grayscaleImageData;
 }
 
 function imageDataFromMat(mat: any): ImageData {

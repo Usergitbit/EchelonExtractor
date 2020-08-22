@@ -1,41 +1,34 @@
-<!-- <canvas *ngIf=debug #canvasOutput id="canvasOutput"></canvas>
-<canvas *ngIf=debug #canvasGray id="canvasGray"></canvas>
-<canvas *ngIf=debug #canvasProcessed id="canvasProcessed"></canvas> -->
-
 <canvas *ngFor="let fileName of files" id={{fileName}} title={{fileName}} #canvasSelector
   class="selected-image-canvas"></canvas>
 
 <div class="caption">
   <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
     accept="image/*" #imgFileInput multiple="true" />
-  <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()" class="button-margin">Add a
-    screenshot</button>
+  <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()"
+    class="button-margin">Add a screenshot</button>
 </div>
 
 <div>
   <div class="control">
-    <div >
-      <div *ngIf="isReady; else isLoading;" >
-      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button-margin">
-        Extract Echelons
-      </button>
+    <div>
+      <div *ngIf="isReady; else isLoading;">
+        <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button-margin">
+          Extract Echelons
+        </button>
+      </div>
     </div>
-      <button mat-raised-button color="primary" type="button" (click)="grayScale()"  class="button-margin">
-        Grayscale
-      </button>
-    </div>
-  </div> 
-</div>
 
-<ng-template #isLoading>
-  <mat-spinner></mat-spinner>
-</ng-template>
+    <ng-template #isLoading>
+      <mat-spinner></mat-spinner>
+    </ng-template>
 
-<div *ngFor="let echelon of extractedEchelons">
-  <mat-card class="card-margin">
-    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>
-      <mat-checkbox class="checkbox-margin" color="primary"></mat-checkbox>
-      <canvas id={{echelon.id}} #echelonCanvasSelector class="echelon-canvas"></canvas>
+    <mat-spinner *ngIf="isWorking"></mat-spinner>
+
+    <div *ngFor="let echelon of extractedEchelons">
+      <mat-card class="card-margin">
+        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>
+          <mat-checkbox class="checkbox-margin" color="primary"></mat-checkbox>
+          <canvas id={{echelon.id}} #echelonCanvasSelector class="echelon-canvas"></canvas>
+        </div>
+      </mat-card>
     </div>
-  </mat-card>
-</div>

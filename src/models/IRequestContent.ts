@@ -1,5 +1,5 @@
+import { IImage } from './IImage';
+
 export interface IRequestContent {
-    imageArrayBuffer: ArrayBuffer;
-    width: number;
-    height: number;
+    images: Array<IImage>;
 }

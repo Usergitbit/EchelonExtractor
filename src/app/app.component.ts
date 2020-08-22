@@ -1,8 +1,7 @@
-import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { fromEvent, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImageProcessingService } from '../services/image-processing.service';
-import { filter } from 'rxjs/operators';
 import { Echelon } from 'src/models';
 
 @Component({
@@ -10,27 +9,18 @@ import { Echelon } from 'src/models';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewInit, OnInit {
-
-  @ViewChild('canvasOutput')
-  canvasOutput!: ElementRef;
-
-  @ViewChild('canvasProcessed')
-  canvasProcessed!: ElementRef;
-  @ViewChild('canvasGray')
-  canvasGray!: ElementRef;
-  @ViewChild('extractButton', { read: ElementRef })
-  extractButton!: ElementRef<HTMLButtonElement>;
+export class AppComponent implements AfterViewInit {
 
   @ViewChildren('canvasSelector')
-  selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
+  private selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
 
   @ViewChildren('echelonCanvasSelector')
-  extractedEchelonsCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
+  private extractedEchelonsCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
 
   public isReady = false;
-
+  public isWorking = false;
   public files = new Array<string>();
+  public extractedEchelons = new Array<Echelon>();
 
   constructor(private imageProcessingService: ImageProcessingService, private changeDetector: ChangeDetectorRef) {
   }
@@ -43,12 +33,12 @@ export class AppComponent implements AfterViewInit, OnInit {
       this.isReady = loadResult;
     });
 
-    this.extractedEchelonsCanvasesQueryList.changes.subscribe((QueryList: QueryList<ElementRef<HTMLCanvasElement>>) => {
-      QueryList.forEach(elementRef => {
+    this.extractedEchelonsCanvasesQueryList.changes.subscribe((queryList: QueryList<ElementRef<HTMLCanvasElement>>) => {
+      queryList.forEach(elementRef => {
         const canvas = elementRef.nativeElement;
         const context = canvas.getContext("2d");
         const echelon = this.extractedEchelons.find(echelon => echelon.id === +canvas.id);
-        if(echelon){
+        if (echelon) {
           canvas.width = echelon.imageData.width;
           canvas.height = echelon.imageData.height;
           context?.putImageData(echelon.imageData, 0, 0);
@@ -95,266 +85,30 @@ export class AppComponent implements AfterViewInit, OnInit {
       }
 
       img.src = data.target.result as string;
-
-
     }
   }
 
-  public ngOnInit(): void {
-  }
-
-  readTemplateDataUrl(eventTarget: EventTarget | null) {
-
-    // let fileInput = eventTarget as HTMLInputElement;
-
-    // if (fileInput?.files?.length) {
-    //   const reader = new FileReader();
-    //   const load$ = fromEvent(reader, 'load');
-    //   load$
-    //     .pipe(
-    //       switchMap(() => {
-    //         return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasTemplate.nativeElement);
-    //       })
-    //     )
-    //     .subscribe(
-    //       () => { },
-    //       err => {
-    //         console.log('Error loading image', err);
-    //       }
-    //     );
-    //   reader.readAsDataURL(fileInput.files[0]);
-    // }
-  }
-
-  public grayScale(): void {
-
-    // const canvas = this.selectedImagesCanvasesQueryList.first.nativeElement;
-    // const ctx = canvas?.getContext("2d");
-
-
-    // const imagedata = ctx?.getImageData(0, 0, canvas.width, canvas.height);
-    // if (imagedata) {
-    //   this.imageProcessingService.extractEchelons(imagedata)
-    //     .pipe(filter(data => data.length != 0))
-    //     .subscribe(data => {
-    //       if (ctx)
-    //         ctx.putImageData(data[0], 0, 0);
-    //     })
-    //}
-
-    // const sourceImage = cv.imread(this.canvasInput.nativeElement.id);
-    // const grayScaledImage = new cv.Mat();
-    // cv.cvtColor(sourceImage, grayScaledImage, cv.COLOR_RGBA2GRAY);
-    // cv.imshow(this.canvasOutput.nativeElement.id, grayScaledImage);
-    // sourceImage.delete();
-    // grayScaledImage.delete();
-
-
-  }
-
-  public extractedEchelons = new Array<Echelon>();
   public extractAllEchelons(): void {
-
+    this.isWorking = true;
+    const selectedImagesdata = new Array<ImageData>();
     this.selectedImagesCanvasesQueryList.forEach(elementRef => {
       const canvas = elementRef.nativeElement;
       const context = canvas?.getContext("2d");
       const imagedata = context?.getImageData(0, 0, canvas.width, canvas.height);
       if (imagedata) {
-        this.imageProcessingService.extractEchelons(imagedata)
-          .pipe(filter(data => data.length != 0))
-          .subscribe(data => {
-            data.forEach(imagedata => {
-              this.extractedEchelons.push(new Echelon(imagedata));
-            });
-          });
+        selectedImagesdata.push(imagedata);
       }
     });
-    // const canvas = this.selectedImagesCanvasesQueryList.first.nativeElement;
-    // const context = canvas?.getContext("2d");
 
-    // const imagedata = context?.getImageData(0, 0, canvas.width, canvas.height);
-    // if (imagedata) {
-    //   this.imageProcessingService.extractEchelons(imagedata)
-    //     .pipe(filter(data => data.length != 0))
-    //     .subscribe(data => {
-    //       if (context)
-    //         context.putImageData(data[0], 0, 0);
-    //     })
-    // }
-
-    // this.allEchelons.delete();
-    // this.allEchelons = new cv.MatVector();
-    // this.extractedEchelons = [];
-    // this.changeDetector.detectChanges();
-
-    // this.files.forEach(file => {
-    //   let imageEchelons = this.extractImageEchelons(file);
-    //   for (let i = imageEchelons.size() - 1; i >= 0; i--)
-    //     this.allEchelons.push_back(imageEchelons.get(i));
-    //   imageEchelons.delete();
-    // });
-
-    // this.subscription?.unsubscribe();
-    // this.subscription = this.extractedEchelonsCanvasesQueryList.changes.subscribe((data: QueryList<ElementRef<HTMLCanvasElement>>) => {
-    //   for (let i = 0; i < data.length; i++) {
-    //     this.loadMatToEchelonCanvas(this.allEchelons.get(i), i.toString());
-    //     this.allEchelons.get(i).delete();
-    //   }
-    // });
-
-    // for (let i = 0; i < this.allEchelons.size(); i++) {
-    //   this.extractedEchelons.push(i.toString());
-    // }
+    this.imageProcessingService.extractEchelons(selectedImagesdata)
+      .subscribe(images => {
+        images.forEach(imageData => {
+          this.extractedEchelons.push(new Echelon(imageData));
+        });
+        this.isWorking = false;
+      },
+        error => {
+          console.log(error);
+        });
   }
-
-  //should return mat vector with all extracted echelons
-  private extractImageEchelons(fileName: string): any {
-    // let initial = cv.imread(fileName);
-    // let src = cv.imread(fileName);
-    // let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-
-    // cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-
-    // cv.threshold(src, src, 50, 250, cv.THRESH_BINARY);
-
-    // let contours = new cv.MatVector();
-
-    // let hierarchy = new cv.Mat();
-
-    // cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-
-    // let result = new cv.MatVector();
-
-    // for (let i = 0; i < contours.size(); ++i) {
-    //   let cnt = contours.get(i);
-    //   let approx = new cv.Mat();
-    //   let peri = cv.arcLength(cnt, true);
-    //   cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
-
-    //   let rect = cv.boundingRect(cnt);
-    //   const aspectRatio = rect.width / rect.height;
-    //   if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
-    //     console.log(`${i} : Width:${rect.width} Height:${rect.height}`);
-    //     let contoursColor = new cv.Scalar(255, 255, 255);
-    //     let rectangleColor = new cv.Scalar(255, 0, 0);
-    //     cv.drawContours(dst, contours, 0, contoursColor, 1, 8, hierarchy, 100);
-    //     let point1 = new cv.Point(rect.x, rect.y);
-    //     let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
-    //     cv.rectangle(dst, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
-
-    //     if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
-    //       let resultMat = initial.roi(rect);
-    //       result.push_back(resultMat);
-    //     }
-
-    //     cnt.delete();
-    //     approx.delete();
-    //   }
-    // }
-
-    // return result;
-  }
-
-  private loadMatToEchelonCanvas(mat: any, canvasId: string): void {
-    //cv.imshow(canvasId, mat);
-  }
-
-  public detectShapes(): void {
-    // let initial = cv.imread(this.canvasInput.nativeElement.id);
-    // let src = cv.imread(this.canvasInput.nativeElement.id);
-    // let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-    // cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-
-    // if (this.debug)
-    //   cv.imshow(this.canvasGray.nativeElement.id, src);
-
-    // cv.threshold(src, src, 50, 250, cv.THRESH_BINARY);
-    // if (this.debug)
-    //   cv.imshow(this.canvasProcessed.nativeElement.id, src);
-
-    // let contours = new cv.MatVector();
-    // let hierarchy = new cv.Mat();
-    // cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-
-    // let copied = new cv.MatVector();
-    // let cols: Number = 0;
-    // let rows: Number = 0;
-
-    // for (let i = 0; i < contours.size(); ++i) {
-    //   let cnt = contours.get(i);
-    //   let approx = new cv.Mat();
-    //   let peri = cv.arcLength(cnt, true);
-    //   cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
-
-    //   let rect = cv.boundingRect(cnt);
-    //   const aspectRatio = rect.width / rect.height;
-    //   if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
-    //     console.log(`${i} : Width:${rect.width} Height:${rect.height}`);
-    //     let contoursColor = new cv.Scalar(255, 255, 255);
-    //     let rectangleColor = new cv.Scalar(255, 0, 0);
-    //     cv.drawContours(dst, contours, 0, contoursColor, 1, 8, hierarchy, 100);
-    //     let point1 = new cv.Point(rect.x, rect.y);
-    //     let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
-    //     cv.rectangle(dst, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
-
-    //     if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rect.width > 100) {
-    //       let resultMat = initial.roi(rect);
-    //       copied.push_back(resultMat);
-
-    //       if (resultMat.cols > cols)
-    //         cols = resultMat.cols;
-    //       rows += resultMat.rows;
-    //     }
-
-    //     cnt.delete();
-    //   }
-    // }
-
-    // if (this.debug)
-    //   cv.imshow(this.canvasOutput.nativeElement.id, dst);
-
-
-    // let result = cv.Mat.ones(rows, cols, copied.get(0).type());
-
-    // let start = 0;
-    // let stop = copied.get(copied.size() - 1).rows;
-    // for (let i = copied.size() - 1; i >= 0; i--) {
-    //   copied.get(i).copyTo(result.rowRange(start, stop).colRange(0, cols));
-    //   if (i != 0) {
-    //     start = stop;
-    //     stop = stop + copied.get(i - 1).rows;
-    //   }
-    // }
-
-
-    // cv.imshow(this.canvasSelected.nativeElement.id, result);
-
-    // contours.delete(); hierarchy.delete();
-
-    // src.delete();
-    // dst.delete();
-    // initial.delete();
-    // for (let i = 0; i < copied.size(); i++) {
-    //   copied.get(i).delete();
-    // }
-
-  }
-
-  public findNumber(): void {
-    // let src = cv.imread(this.canvasInput.nativeElement.id);
-    // let templ = cv.imread(this.canvasTemplate.nativeElement.id);
-    // let dst = new cv.Mat();
-    // let mask = new cv.Mat();
-    // cv.matchTemplate(src, templ, dst, cv.TM_SQDIFF_NORMED, mask);
-    // let result = cv.minMaxLoc(dst, mask);
-    // let maxPoint = result.minLoc;
-    // let color = new cv.Scalar(255, 0, 0, 255);
-    // let point = new cv.Point(maxPoint.x + templ.cols, maxPoint.y + templ.rows);
-    // cv.rectangle(src, maxPoint, point, color, 2, cv.LINE_8, 0);
-    // cv.imshow(this.canvasNumber.nativeElement.id, src);
-    // src.delete();
-    // dst.delete();
-    // mask.delete();
-  }
-
 }

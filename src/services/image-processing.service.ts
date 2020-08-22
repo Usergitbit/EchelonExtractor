@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import {  BehaviorSubject, Observable } from 'rxjs';
-import { IWorkerResponseMessageEvent, IWorkerRequestMessageData, WorkerResponseType, WorkerRequestType, IRequestInformation, ObservableEchelonCollection, IWorkerResponseMessageData, IRequestContent } from "../models";
+import {  BehaviorSubject, Observable, Subject } from 'rxjs';
+import { IWorkerResponseMessageEvent, IWorkerRequestMessageData, WorkerResponseType, 
+  WorkerRequestType, IRequestInformation, IWorkerResponseMessageData, IRequestContent, IImage } from "../models";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class ImageProcessingService {
 
   private isLoadedSubject = new BehaviorSubject<boolean>(false);
 
-  private requestObservableCollections = new Map<number, ObservableEchelonCollection>();
+  private requestSubjectCollections = new Map<number, Subject<Array<ImageData>>>();
 
   constructor() {
   }
@@ -33,19 +34,19 @@ export class ImageProcessingService {
     return this.isLoadedSubject.asObservable();
   }
 
-  public extractEchelons(image: ImageData): Observable<Array<ImageData>> {
+  public extractEchelons(images: Array<ImageData>): Observable<Array<ImageData>> {
 
-    if (!image || !image.data)
+    if (!images || images.length == 0)
       throw new Error("No image data provided!");
 
     const requestInformation = this.createRequestInformation(WorkerRequestType.ExtractEchelons);
-    const requestContent = this.createRequestContent(image);
-    const observableEchelonCollection = new ObservableEchelonCollection();
+    const requestContent = this.createRequestContent(images);
+    const observableEchelonCollection = new Subject<Array<ImageData>>();
 
-    this.requestObservableCollections.set(+requestInformation.id, observableEchelonCollection);
+    this.requestSubjectCollections.set(+requestInformation.id, observableEchelonCollection);
     this.postRequest({ information: requestInformation, content: requestContent });
 
-    return observableEchelonCollection.echelonsObservable;
+    return observableEchelonCollection.asObservable();
   }
 
   private handleResponseMessage(data: IWorkerResponseMessageData): void {
@@ -65,20 +66,24 @@ export class ImageProcessingService {
 
     const responseInformation = data.information;
     const responseContent = data.content;
-    const requestObservable = this.requestObservableCollections.get(data.information.requestId);
+    const requestSubject = this.requestSubjectCollections.get(data.information.requestId);
 
     if (responseContent) {
-      const imageData = new ImageData(new Uint8ClampedArray(responseContent.imageArrayBuffer), responseContent.width, responseContent.height);
-      requestObservable?.add(imageData);
+      let responseImages = new Array<ImageData>();
+      responseContent.images.forEach(image => {
+        const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
+        responseImages.push(imageData);
+      });
+      requestSubject?.next(responseImages);
     }
     else {
-      requestObservable?.error(`Missing payload for request ${responseInformation.requestId}`);
-      this.requestObservableCollections.delete(responseInformation.requestId);
+      requestSubject?.error(`Missing payload for request ${responseInformation.requestId}`);
+      this.requestSubjectCollections.delete(responseInformation.requestId);
     }
 
     if (responseInformation.requestCompleted) {
-      requestObservable?.complete();
-      this.requestObservableCollections.delete(responseInformation.requestId);
+      requestSubject?.complete();
+      this.requestSubjectCollections.delete(responseInformation.requestId);
     }
   }
 
@@ -87,14 +92,21 @@ export class ImageProcessingService {
     return { requestType: requestTypeParameter, id: requestId };
   }
 
-  private createRequestContent(image: ImageData): IRequestContent {
-    return { height: image.height, width: image.width, imageArrayBuffer: image.data.buffer };
+  private createRequestContent(images: Array<ImageData>): IRequestContent {
+
+    let contentImages = new Array<IImage>();
+    images.forEach(image => {
+      contentImages.push({ imageArrayBuffer: image.data.buffer, width:image.width, height: image.height });
+    });
+
+    return { images: contentImages };
   }
 
   private postRequest(request: IWorkerRequestMessageData) {
-
-    if (request.content)
-      this.worker.postMessage(request, [request.content?.imageArrayBuffer as ArrayBuffer]);
+    if (request.content){
+      const arrayBuffers = request.content.images.map(image => image.imageArrayBuffer);
+      this.worker.postMessage(request, arrayBuffers);
+    }
     else
       this.worker.postMessage(request);
   }
