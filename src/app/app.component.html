@@ -20,10 +20,10 @@
       <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
         accept="image/*" #imgFileInput multiple="true" />
       <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()"
-        class="button">Add screenshots</button>
+        [disabled]="!isReady" class="button">Add screenshots</button>
     </div>
 
-    <div fxLayout="row" fxLayoutGap="10px" fxFlexAlign="center center">
+    <div fxLayout="row wrap" fxLayoutGap="10px" fxFlexAlign="center center">
       <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button"
         [disabled]="(files.length ==0 || !isReady)">
         Extract Echelons
@@ -38,28 +38,33 @@
   </div>
 
   <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="center center">
-    <div *ngFor="let fileName of files">
-    <canvas  id={{fileName}} title={{fileName}} #canvasSelector
-      class="selected-image-canvas"></canvas>
+    <div *ngIf="isReady else loadingTemplate" fxFill>
+
+      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="center center" fxFill>
+        <div *ngFor="let fileName of files">
+          <canvas id={{fileName}} title={{fileName}} #canvasSelector class="selected-image-canvas"></canvas>
+        </div>
+      </div>
+
     </div>
   </div>
 
+  <div fxFlex fxLayout="row wrap" fxLayoutAlign="center center">
+    <div *ngFor="let echelon of extractedEchelons">
+      <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
+    </div>
+  </div>
+
+  <div class="resultCanvas" fxFlex fxLayoutAlign="center center" fxFill>
+    <canvas #resultCanvas class="selected-image-canvas"></canvas>
+  </div>
+
 </div>
 
 
 
 
 
-<ng-template #isLoading>
+<ng-template #loadingTemplate>
   <mat-spinner></mat-spinner>
 </ng-template>
-
-<mat-spinner *ngIf="isWorking"></mat-spinner>
-
-<canvas #resultCanvas></canvas>
-
-<div fxFlex>
-  <div *ngFor="let echelon of extractedEchelons">
-    <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
-  </div>
-</div>
