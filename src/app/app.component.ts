@@ -14,15 +14,12 @@ export class AppComponent implements AfterViewInit {
   @ViewChildren('canvasSelector')
   private selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
 
-  @ViewChildren('echelonCanvasSelector')
-  private extractedEchelonsCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
-
   public isReady = false;
   public isWorking = false;
   public files = new Array<string>();
   public extractedEchelons = new Array<Echelon>();
 
-  constructor(private imageProcessingService: ImageProcessingService) {
+  public constructor(private imageProcessingService: ImageProcessingService) {
   }
 
   public ngAfterViewInit(): void {
@@ -31,19 +28,6 @@ export class AppComponent implements AfterViewInit {
       return of(false);
     })).subscribe(loadResult => {
       this.isReady = loadResult;
-    });
-
-    this.extractedEchelonsCanvasesQueryList.changes.subscribe((queryList: QueryList<ElementRef<HTMLCanvasElement>>) => {
-      queryList.forEach(elementRef => {
-        const canvas = elementRef.nativeElement;
-        const context = canvas.getContext("2d");
-        const echelon = this.extractedEchelons.find(echelon => echelon.id === +canvas.id);
-        if (echelon) {
-          canvas.width = echelon.imageData.width;
-          canvas.height = echelon.imageData.height;
-          context?.putImageData(echelon.imageData, 0, 0);
-        }
-      });
     });
   }
 

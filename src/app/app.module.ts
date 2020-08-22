@@ -10,10 +10,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BaseComponentComponent } from './shared/base-component/base-component.component';
+import { EchelonCanvasComponent } from './components/echelon-canvas/echelon-canvas.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    BaseComponentComponent,
+    EchelonCanvasComponent
   ],
   imports: [
     BrowserModule,

@@ -24,11 +24,8 @@
 
     <mat-spinner *ngIf="isWorking"></mat-spinner>
 
-    <div *ngFor="let echelon of extractedEchelons">
-      <mat-card class="card-margin">
-        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>
-          <mat-checkbox class="checkbox-margin" color="primary"></mat-checkbox>
-          <canvas id={{echelon.id}} #echelonCanvasSelector class="echelon-canvas"></canvas>
-        </div>
-      </mat-card>
+    <div fxFlex>
+      <div *ngFor="let echelon of extractedEchelons">
+        <app-echelon-canvas [echelon]="echelon"></app-echelon-canvas>
+      </div>
     </div>
