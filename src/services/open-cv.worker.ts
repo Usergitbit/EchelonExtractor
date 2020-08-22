@@ -30,17 +30,21 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
       if (!data.content)
         throw new Error("Image content must not be null or undefined");
 
-      const result = grayscale(data.content);
-      const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id, true);
-      const responseContent = createResponseContent(result);
-      postResponse({ information: responseInformation, content: responseContent });
+      const result = extractEchelons(data.content);
+      let completed = result.length == 0;
+      for (let i = 0; i < result.length; i++) {
+        completed = (i == result.length - 1);
+        const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id, completed);
+        const responseContent = createResponseContent(result[i]);
+        postResponse({ information: responseInformation, content: responseContent });
+      }
       break;
     }
     default: break;
   }
 });
 
-function extractEchelons(content: IRequestContent) {
+function extractEchelons(content: IRequestContent): Array<ImageData> {
 
   const imageData = new ImageData(new Uint8ClampedArray(content.imageArrayBuffer), content.width, content.height);
   const initialMat = cv.matFromImageData(imageData);
@@ -55,7 +59,7 @@ function extractEchelons(content: IRequestContent) {
   let contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
   cv.findContours(sourceMat, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-  let foundEchelons = new cv.MatVector();
+  let foundEchelonsMats = new cv.MatVector();
 
   for (let i = 0; i < contours.size(); i++) {
     let contour = contours.get(i);
@@ -64,10 +68,33 @@ function extractEchelons(content: IRequestContent) {
     cv.approxPolyDP(contour, approximation, 0.04 * perimeter, true);
 
     const rectangle = cv.boundingRect(contour);
+    const aspectRatio = rectangle.width / rectangle.height;
+    if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rectangle.width > 100) {
+      console.log(`${i} : Width:${rectangle.width} Height:${rectangle.height}`);
+      // const contoursColor = new cv.Scalar(255, 255, 255);
+      // const rectangleColor = new cv.Scalar(255, 0, 0);
+      // cv.drawContours(destinationMat, contours, 0, contoursColor, 1, 8, hierarchy, 100);
+      // let point1 = new cv.Point(rectangle.x, rectangle.y);
+      // let point2 = new cv.Point(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
+      // cv.rectangle(destinationMat, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
+      const resultMat = initialMat.roi(rectangle);
+      foundEchelonsMats.push_back(resultMat);
 
+      contour.delete();
+      approximation.delete();
+    }
   }
 
+  const imageDataResults = new Array<ImageData>();
+  for (let i = 0; i < foundEchelonsMats.size(); i++) {
+    const echelonMat = foundEchelonsMats.get(i);
+    const echelonImageData = imageDataFromMat(echelonMat);
+    imageDataResults.push(echelonImageData);
+    echelonMat.delete();
+  }
 
+  foundEchelonsMats.delete();
+  return imageDataResults;
 }
 
 

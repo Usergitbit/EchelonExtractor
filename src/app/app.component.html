@@ -1,6 +1,6 @@
-<canvas *ngIf=debug #canvasOutput id="canvasOutput"></canvas>
+<!-- <canvas *ngIf=debug #canvasOutput id="canvasOutput"></canvas>
 <canvas *ngIf=debug #canvasGray id="canvasGray"></canvas>
-<canvas *ngIf=debug #canvasProcessed id="canvasProcessed"></canvas>
+<canvas *ngIf=debug #canvasProcessed id="canvasProcessed"></canvas> -->
 
 <canvas *ngFor="let fileName of files" id={{fileName}} title={{fileName}} #canvasSelector
   class="selected-image-canvas"></canvas>
@@ -35,7 +35,7 @@
   <mat-card class="card-margin">
     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>
       <mat-checkbox class="checkbox-margin" color="primary"></mat-checkbox>
-      <canvas id={{echelon}} #echelonCanvasSelector class="echelon-canvas"></canvas>
+      <canvas id={{echelon.id}} #echelonCanvasSelector class="echelon-canvas"></canvas>
     </div>
   </mat-card>
 </div>

@@ -9,6 +9,7 @@ export * from "./IResponseInformation";
 export * from "./IWorkerResponseMessageData";
 export * from "./IWorkerResponseMessageEvent";
 export * from "./ObservableEchelonCollection";
+export * from "./Echelon";
 
 
 

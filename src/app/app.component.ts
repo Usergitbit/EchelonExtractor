@@ -1,8 +1,9 @@
-import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ɵclearOverrides, ChangeDetectorRef, OnInit } from '@angular/core';
-import { Observable, fromEvent, Subscription, of } from 'rxjs';
+import { Component, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit, ChangeDetectorRef, OnInit } from '@angular/core';
+import { fromEvent, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImageProcessingService } from '../services/image-processing.service';
 import { filter } from 'rxjs/operators';
+import { Echelon } from 'src/models';
 
 @Component({
   selector: 'app-root',
@@ -27,17 +28,9 @@ export class AppComponent implements AfterViewInit, OnInit {
   @ViewChildren('echelonCanvasSelector')
   extractedEchelonsCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
 
-  public debug: boolean = false;
-
   public isReady = false;
 
-
   public files = new Array<string>();
-  public extractedEchelons = new Array<string>();
-
-
-  private allEchelons: any;
-  private subscription!: Subscription;
 
   constructor(private imageProcessingService: ImageProcessingService, private changeDetector: ChangeDetectorRef) {
   }
@@ -48,7 +41,20 @@ export class AppComponent implements AfterViewInit, OnInit {
       return of(false);
     })).subscribe(loadResult => {
       this.isReady = loadResult;
-    })
+    });
+
+    this.extractedEchelonsCanvasesQueryList.changes.subscribe((QueryList: QueryList<ElementRef<HTMLCanvasElement>>) => {
+      QueryList.forEach(elementRef => {
+        const canvas = elementRef.nativeElement;
+        const context = canvas.getContext("2d");
+        const echelon = this.extractedEchelons.find(echelon => echelon.id === +canvas.id);
+        if(echelon){
+          canvas.width = echelon.imageData.width;
+          canvas.height = echelon.imageData.height;
+          context?.putImageData(echelon.imageData, 0, 0);
+        }
+      });
+    });
   }
 
   public onFileSelected(target: EventTarget | null): void {
@@ -122,19 +128,19 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   public grayScale(): void {
 
-    const canvas = this.selectedImagesCanvasesQueryList.first.nativeElement;
-    const ctx = canvas?.getContext("2d");
+    // const canvas = this.selectedImagesCanvasesQueryList.first.nativeElement;
+    // const ctx = canvas?.getContext("2d");
 
 
-    const imagedata = ctx?.getImageData(0, 0, canvas.width, canvas.height);
-    if (imagedata) {
-      this.imageProcessingService.extractEchelons(imagedata)
-        .pipe(filter(data => data.length != 0))
-        .subscribe(data => {
-          if (ctx)
-            ctx.putImageData(data[0], 0, 0);
-        })
-    }
+    // const imagedata = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+    // if (imagedata) {
+    //   this.imageProcessingService.extractEchelons(imagedata)
+    //     .pipe(filter(data => data.length != 0))
+    //     .subscribe(data => {
+    //       if (ctx)
+    //         ctx.putImageData(data[0], 0, 0);
+    //     })
+    //}
 
     // const sourceImage = cv.imread(this.canvasInput.nativeElement.id);
     // const grayScaledImage = new cv.Mat();
@@ -146,7 +152,36 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   }
 
+  public extractedEchelons = new Array<Echelon>();
   public extractAllEchelons(): void {
+
+    this.selectedImagesCanvasesQueryList.forEach(elementRef => {
+      const canvas = elementRef.nativeElement;
+      const context = canvas?.getContext("2d");
+      const imagedata = context?.getImageData(0, 0, canvas.width, canvas.height);
+      if (imagedata) {
+        this.imageProcessingService.extractEchelons(imagedata)
+          .pipe(filter(data => data.length != 0))
+          .subscribe(data => {
+            data.forEach(imagedata => {
+              this.extractedEchelons.push(new Echelon(imagedata));
+            });
+          });
+      }
+    });
+    // const canvas = this.selectedImagesCanvasesQueryList.first.nativeElement;
+    // const context = canvas?.getContext("2d");
+
+    // const imagedata = context?.getImageData(0, 0, canvas.width, canvas.height);
+    // if (imagedata) {
+    //   this.imageProcessingService.extractEchelons(imagedata)
+    //     .pipe(filter(data => data.length != 0))
+    //     .subscribe(data => {
+    //       if (context)
+    //         context.putImageData(data[0], 0, 0);
+    //     })
+    // }
+
     // this.allEchelons.delete();
     // this.allEchelons = new cv.MatVector();
     // this.extractedEchelons = [];
