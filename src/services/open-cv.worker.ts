@@ -40,6 +40,35 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   }
 });
 
+function extractEchelons(content: IRequestContent) {
+
+  const imageData = new ImageData(new Uint8ClampedArray(content.imageArrayBuffer), content.width, content.height);
+  const initialMat = cv.matFromImageData(imageData);
+  let sourceMat = cv.matFromImageData(imageData);
+  let destinationMat = cv.Mat.zeros(sourceMat.rows, sourceMat.cols, cv.CV_8UC3);
+
+  //grayscale
+  cv.cvtColor(sourceMat, sourceMat, cv.COLOR_RGBA2GRAY, 0);
+  //threshold numbers were determined experimentally
+  cv.threshold(sourceMat, sourceMat, 50, 250, cv.THRESH_BINARY);
+
+  let contours = new cv.MatVector();
+  const hierarchy = new cv.Mat();
+  cv.findContours(sourceMat, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+  let foundEchelons = new cv.MatVector();
+
+  for (let i = 0; i < contours.size(); i++) {
+    let contour = contours.get(i);
+    let approximation = new cv.Mat();
+    let perimeter = cv.arcLength(contour, true);
+    cv.approxPolyDP(contour, approximation, 0.04 * perimeter, true);
+
+    const rectangle = cv.boundingRect(contour);
+
+  }
+
+
+}
 
 
 function createResponseInformation(responseType: WorkerResponseType, requestId: number, requestCompleted?: boolean): IResponseInformation {

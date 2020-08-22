@@ -8,10 +8,9 @@ import { IWorkerResponseMessageEvent, IWorkerRequestMessageData, WorkerResponseT
 export class ImageProcessingService {
 
   private id = 1;
+
   private worker!: Worker;
 
-
-  private hasBeenLoaded = false;
   private isLoadedSubject = new BehaviorSubject<boolean>(false);
 
   private requestObservableCollections = new Map<number, ObservableEchelonCollection>();
@@ -34,12 +33,26 @@ export class ImageProcessingService {
     return this.isLoadedSubject.asObservable();
   }
 
+  public extractEchelons(image: ImageData): Observable<Array<ImageData>> {
+
+    if (!image || !image.data)
+      throw new Error("No image data provided!");
+
+    const requestInformation = this.createRequestInformation(WorkerRequestType.ExtractEchelons);
+    const requestContent = this.createRequestContent(image);
+    const observableEchelonCollection = new ObservableEchelonCollection();
+
+    this.requestObservableCollections.set(+requestInformation.id, observableEchelonCollection);
+    this.postRequest({ information: requestInformation, content: requestContent });
+
+    return observableEchelonCollection.echelonsObservable;
+  }
+
   private handleResponseMessage(data: IWorkerResponseMessageData): void {
     switch (data.information.responseType) {
       case WorkerResponseType.LoadCompleted: {
         console.log("OpenCV has been loaded.");
         this.isLoadedSubject.next(true);
-        this.hasBeenLoaded = true;
         break;
       }
       case WorkerResponseType.EchelonExtracted:
@@ -67,21 +80,6 @@ export class ImageProcessingService {
       requestObservable?.complete();
       this.requestObservableCollections.delete(responseInformation.requestId);
     }
-  }
-
-  public extractEchelons(image: ImageData): Observable<Array<ImageData>> {
-
-    if (!image || !image.data)
-      throw new Error("No image data provided!");
-
-    const requestInformation = this.createRequestInformation(WorkerRequestType.ExtractEchelons);
-    const requestContent = this.createRequestContent(image);
-    const observableEchelonCollection = new ObservableEchelonCollection();
-
-    this.requestObservableCollections.set(+requestInformation.id, observableEchelonCollection);
-    this.postRequest({ information: requestInformation, content: requestContent });
-
-    return observableEchelonCollection.echelonsObservable;
   }
 
   private createRequestInformation(requestTypeParameter: WorkerRequestType): IRequestInformation {
