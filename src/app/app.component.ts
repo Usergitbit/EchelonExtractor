@@ -1,8 +1,8 @@
 import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { fromEvent, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ImageProcessingService } from '../services/image-processing.service';
-import { Echelon } from 'src/models';
+import { ImageProcessingService } from './services/image-processing.service';
+import { Echelon } from './models';
 
 @Component({
   selector: 'app-root',
