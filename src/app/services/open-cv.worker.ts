@@ -167,6 +167,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
   }
 
   foundEchelonsMats.delete();
+  contours.delete();
   initialMat.delete();
   processedMat.delete();
   return imageDataResults;
