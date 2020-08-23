@@ -16,6 +16,7 @@ $primary: map-get($theme, primary);
     border-style: solid;
     border-color: transparent;
     border-radius: 5px;
+    border-width: 2px;
     padding: 2px;
     cursor: pointer;
     box-shadow: 0 5px 5px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
@@ -28,4 +29,5 @@ $primary: map-get($theme, primary);
 
 .selected {
     border-color: mat-color($primary);
+    border-width: 2px;
 }
