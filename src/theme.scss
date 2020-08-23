@@ -1,0 +1,50 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+$md-griffin: (
+    50 : #fffbe0,
+    100 : #fff5b3,
+    200 : #ffee80,
+    300 : #fee74d,
+    400 : #fee126,
+    500 : #fedc00,
+    600 : #fed800,
+    700 : #fed300,
+    800 : #fece00,
+    900 : #fdc500,
+    A100 : #ffffff,
+    A200 : #fffbf1,
+    A400 : #ffeebe,
+    A700 : #ffe8a4,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #000000,
+        600 : #000000,
+        700 : #000000,
+        800 : #000000,
+        900 : #000000,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+$griffin-primary: mat-palette($md-griffin);
+$griffn-accent:  mat-palette($mat-pink, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$griffin-warn:    mat-palette($mat-red);
+
+$theme: mat-dark-theme($griffin-primary, $griffn-accent, $griffin-warn);
+
+$griffin-background-color: #4b4b4d;//#7e807f; //dbd9dc
+$background: map-get($theme, background);
+$background: map_merge($background, (background: $griffin-background-color));
+$theme: map_merge($theme, (background: $background));
+
+@include angular-material-theme($theme);

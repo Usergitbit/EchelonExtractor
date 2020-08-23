@@ -3,6 +3,8 @@ import { fromEvent, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImageProcessingService } from './services/image-processing.service';
 import { Echelon } from './models';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
 
 @Component({
   selector: 'app-root',
@@ -15,11 +17,16 @@ export class AppComponent implements AfterViewInit {
   private selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
   @ViewChild('resultCanvas')
   private resultCanvasElementRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('imgFileInput')
+  private imgFileInputRef!: ElementRef<HTMLInputElement>;
 
   public isReady = false;
   public isWorking = false;
   public files = new Array<string>();
   public extractedEchelons = new Array<Echelon>();
+  public faGithub = faGithub;
+  public faQuestionCircle = faQuestionCircle;
+  public resultCanvasHidden = true;
 
   public constructor(private imageProcessingService: ImageProcessingService) {
   }
@@ -35,6 +42,7 @@ export class AppComponent implements AfterViewInit {
 
   public onFileSelected(target: EventTarget | null): void {
     this.files = [];
+    this.resultCanvasHidden = true;
     let value = target as HTMLInputElement;
     if (value == null || value.files == null || value.files.length == 0)
       return;
@@ -86,12 +94,14 @@ export class AppComponent implements AfterViewInit {
       }
     });
 
+    this.clearSelectedFiles();
+
     this.imageProcessingService.extractEchelons(selectedImagesdata)
       .subscribe(images => {
+        this.isWorking = false;
         images.forEach(imageData => {
           this.extractedEchelons.push(new Echelon(imageData));
         });
-        this.isWorking = false;
       },
         error => {
           console.log(error);
@@ -102,13 +112,23 @@ export class AppComponent implements AfterViewInit {
     const selectedEchelons = this.extractedEchelons.filter(echelon => echelon.isSelected);
     const imagesData = selectedEchelons.map(echelon => echelon.imageData);
     this.extractedEchelons = [];
+    this.isWorking = true;
     this.imageProcessingService.combineEchelons(imagesData)
       .subscribe(data => {
+        this.isWorking = false;
         const canvas = this.resultCanvasElementRef.nativeElement;
         canvas.width = data.width;
         canvas.height = data.height;
         const context = canvas.getContext("2d");
         context?.putImageData(data, 0, 0);
+        this.resultCanvasHidden = false;
       });
+  }
+  
+  private clearSelectedFiles() {
+    this.files = [];
+    var fileInput = this.imgFileInputRef?.nativeElement;
+    if(fileInput)
+      fileInput.value = "";
   }
 }

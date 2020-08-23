@@ -8,9 +8,11 @@
     height: auto;
 }
 
-.selected-image-canvas {
+.image-canvas {
     max-width: 300px;
     max-height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
 .button {
@@ -18,20 +20,33 @@
 }
 
 
+.github-link {
+  margin-left: auto;
+  margin-right: 16px;
+}
 
+.github-icon {
+  margin-left: 10px;
+}
 
+.icon {
+  font-size: 25px;
+  color: white;
+}
 
 .toolbar {
     height: 60px;
     display: flex;
     align-items: center;
-    background-color: #1976d2;
+    background-color: #292e2a;
     color: white;
     font-weight: 600;
   }
 
   .toolbar img {
     margin: 0 16px;
+    height: 40px;
+    width: auto;
   }
 
   .toolbar #twitter-logo {
