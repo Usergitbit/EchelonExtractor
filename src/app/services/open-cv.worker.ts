@@ -121,17 +121,17 @@ function extractEchelons(image: IImage): Array<ImageData> {
 
   const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
   const initialMat = cv.matFromImageData(imageData);
-  let sourceMat = cv.matFromImageData(imageData);
-  //let destinationMat = cv.Mat.zeros(sourceMat.rows, sourceMat.cols, cv.CV_8UC3);
+  let processedMat = cv.matFromImageData(imageData);
+  //let destinationMat = cv.Mat.zeros(processedMat.rows, processedMat.cols, cv.CV_8UC3);
 
   //grayscale
-  cv.cvtColor(sourceMat, sourceMat, cv.COLOR_RGBA2GRAY, 0);
+  cv.cvtColor(processedMat, processedMat, cv.COLOR_RGBA2GRAY, 0);
   //threshold numbers were determined experimentally
-  cv.threshold(sourceMat, sourceMat, 50, 250, cv.THRESH_BINARY);
+  cv.threshold(processedMat, processedMat, 50, 250, cv.THRESH_BINARY);
 
   let contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
-  cv.findContours(sourceMat, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+  cv.findContours(processedMat, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
   let foundEchelonsMats = new cv.MatVector();
 
   for (let i = 0; i < contours.size(); i++) {
@@ -167,6 +167,8 @@ function extractEchelons(image: IImage): Array<ImageData> {
   }
 
   foundEchelonsMats.delete();
+  initialMat.delete();
+  processedMat.delete();
   return imageDataResults;
 }
 
