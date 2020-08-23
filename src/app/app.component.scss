@@ -37,23 +37,17 @@
 .toolbar {
     height: 60px;
     display: flex;
+    margin-bottom: 25px;
     align-items: center;
     background-color: #292e2a;
     color: white;
     font-weight: 600;
+    box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    margin-bottom: 25px !important;
   }
 
   .toolbar img {
     margin: 0 16px;
     height: 40px;
     width: auto;
-  }
-
-  .toolbar #twitter-logo {
-    height: 40px;
-    margin: 0 16px;
-  }
-
-  .toolbar #twitter-logo:hover {
-    opacity: 0.8;
   }

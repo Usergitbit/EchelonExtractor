@@ -43,6 +43,7 @@ export class AppComponent implements AfterViewInit {
   public onFileSelected(target: EventTarget | null): void {
     this.files = [];
     this.resultCanvasHidden = true;
+    this.extractedEchelons = [];
     let value = target as HTMLInputElement;
     if (value == null || value.files == null || value.files.length == 0)
       return;

@@ -1,5 +1,5 @@
 <div fxLayout="column" fxFill fxLayoutGap="10px">
-  <div class="toolbar" role="banner" fxLayout="row">
+  <div class="toolbar" fxLayout="row">
     <img width="40" alt="Griffin and Kryuger Logo"
       src="../assets/images/griffinAndKryugerLogoWhite.png" />
     <span>Echelon Extractor</span>
@@ -21,17 +21,17 @@
       <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
         accept="image/*" #imgFileInput multiple="true" />
       <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()"
-        [disabled]="!isReady" class="button">Add screenshots</button>
+        [disabled]="(!isReady || isWorking) " class="button">Choose screenshots</button>
     </div>
 
     <div fxLayout="row wrap" fxLayoutGap="10px" fxFlexAlign="center center">
       <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button"
-        [disabled]="(files.length ==0 || !isReady)">
+        [disabled]="(files.length ==0 || !isReady || isWorking)">
         Extract Echelons
       </button>
 
       <button mat-raised-button color="primary" type="button" (click)="combineSelectedEchelons()"
-        [disabled]="(extractedEchelons.length == 0 || !isReady)" class="button">
+        [disabled]="(extractedEchelons.length == 0 || !isReady || isWorking)" class="button">
         Combine echelons
       </button>
     </div>
