@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Echelon } from 'src/app/models';
 
 @Component({
@@ -27,7 +27,7 @@ export class EchelonCanvasComponent implements AfterViewInit {
     }
   }
 
-  public onCheckedChanged() {
+  public onClick() {
     this.echelon.isSelected = !this.echelon.isSelected;
   }
 

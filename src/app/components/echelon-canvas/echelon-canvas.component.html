@@ -1,6 +1,5 @@
-<mat-card class="card-margin">
-    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap >
-      <mat-checkbox class="checkbox-margin" color="primary" [checked]="echelon.isSelected" (change)="onCheckedChanged()" ></mat-checkbox>
-      <canvas #echelonCanvasSelector class="echelon-canvas"></canvas>
-    </div>
-  </mat-card>
+<div class="card" [class.selected]="echelon.isSelected" (click)="onClick()">
+  <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap>
+    <canvas #echelonCanvasSelector class="echelon-canvas"></canvas>
+  </div>
+</div>
