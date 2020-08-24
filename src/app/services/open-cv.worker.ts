@@ -38,8 +38,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
 function handleLoadRequest(data: IWorkerRequestMessageData): void {
   console.log("Recieved load request");
   (self as unknown as IModule)["Module"] = {
-    scriptUrl: 'assets/opencv/asm/3.4/opencv.js',
-    wasmBinaryFile: 'assets/opencv/wasm/3.4/opencv_js.wasm',
+    wasmBinaryFile: 'assets/opencv/wasm/4.4/opencv_js.wasm',
     usingWasm: true,
     locateFile: locateFile,
     onRuntimeInitialized: () => {
@@ -59,7 +58,6 @@ function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
   let extractedEchelons = new Array<ImageData>();
 
   for (let i = 0; i < images.length; i++) {
-    //TODO: possibly causes a call stack exceeded exception?
     const results = extractEchelons(images[i]);
     results.forEach(result => {
       extractedEchelons.push(result);
