@@ -1,6 +1,5 @@
 /// <reference lib="webworker" />
 declare var cv: any;
-
 import {
   IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType,
   IResponseContent, IResponseInformation, IImage, IWorkerRequestMessageData
@@ -12,14 +11,19 @@ export interface IModule extends WorkerGlobalScope {
 
 addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   const data = messageEvent.data;
-
   switch (data.information.requestType) {
     case WorkerRequestType.Load: {
       handleLoadRequest(data);
       break;
     }
     case WorkerRequestType.ExtractEchelons: {
-      handleExtractEchelonRequest(data);
+      try {
+        handleExtractEchelonRequest(data);
+      }
+      catch (Exception) {
+        console.log(Exception);
+        throw new Error(`${data.information.id}`);
+      }
       break;
     }
     case WorkerRequestType.CombineEchelons: {
@@ -42,6 +46,7 @@ function handleLoadRequest(data: IWorkerRequestMessageData): void {
       postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.id } });
     }
   };
+  (self as any)["currentRequestId"] = 0;
   // Import Webassembly script
   self.importScripts('./assets/opencv/wasm/3.4/opencv.js');
 }
@@ -54,6 +59,7 @@ function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
   let extractedEchelons = new Array<ImageData>();
 
   for (let i = 0; i < images.length; i++) {
+    //TODO: possibly causes a call stack exceeded exception?
     const results = extractEchelons(images[i]);
     results.forEach(result => {
       extractedEchelons.push(result);
@@ -98,10 +104,10 @@ function combineEchelons(images: Array<IImage>): ImageData {
   let resultMat = cv.Mat.ones(rows, cols, type);
   let startRow = 0;
   let endRow = imageMats.get(0).rows;
-  for(let i = 0; i < imageMats.size(); i++) {
+  for (let i = 0; i < imageMats.size(); i++) {
     const imageMat = imageMats.get(i);
-    imageMat.copyTo(resultMat.rowRange(startRow, endRow).colRange(0, cols));
-    if(i != imageMats.size() - 1) {
+    imageMat.copyTo(resultMat.rowRange(startRow, endRow).colRange(0, imageMat.cols));
+    if (i != imageMats.size() - 1) {
       startRow = endRow;
       endRow += imageMats.get(i + 1).rows;
     }
@@ -119,6 +125,7 @@ function combineEchelons(images: Array<IImage>): ImageData {
 
 function extractEchelons(image: IImage): Array<ImageData> {
 
+
   const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
   const initialMat = cv.matFromImageData(imageData);
   let processedMat = cv.matFromImageData(imageData);
@@ -132,7 +139,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
   let contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
   cv.findContours(processedMat, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-  let foundEchelonsMats = new cv.MatVector();
+  const imageDataResults = new Array<ImageData>();
 
   for (let i = 0; i < contours.size(); i++) {
     let contour = contours.get(i);
@@ -151,25 +158,19 @@ function extractEchelons(image: IImage): Array<ImageData> {
       // let point2 = new cv.Point(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
       // cv.rectangle(destinationMat, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
       const resultMat = initialMat.roi(rectangle);
-      foundEchelonsMats.push_back(resultMat);
-
-      contour.delete();
-      approximation.delete();
+      const echelonImageData = imageDataFromMat(resultMat);
+      imageDataResults.push(echelonImageData);
+      resultMat.delete();
     }
+    approximation.delete();
+    contour.delete();
   }
 
-  const imageDataResults = new Array<ImageData>();
-  for (let i = foundEchelonsMats.size() - 1; i >= 0; i--) {
-    const echelonMat = foundEchelonsMats.get(i);
-    const echelonImageData = imageDataFromMat(echelonMat);
-    imageDataResults.push(echelonImageData);
-    echelonMat.delete();
-  }
-
-  foundEchelonsMats.delete();
+  hierarchy.delete();
   contours.delete();
-  initialMat.delete();
   processedMat.delete();
+  initialMat.delete();
+
   return imageDataResults;
 }
 

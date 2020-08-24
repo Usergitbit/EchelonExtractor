@@ -26,6 +26,7 @@ export class ImageProcessingService {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker('./open-cv.worker', { type: 'module' });
       this.worker.onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); }
+      this.worker.onerror = (error) => { this.handleErrorMessage(error); }
       const request = this.createRequestInformation(WorkerRequestType.Load);
       console.log("Sending load request.");
       this.postRequest({ information: request });
@@ -162,5 +163,15 @@ export class ImageProcessingService {
       this.worker.postMessage(request);
   }
 
+  private handleErrorMessage(error: any): void {
+    console.log(`WASM ERROR'D REQUEST ID ${error.target.currentRequestId}`);
+    const request = this.extractRequestMap.get(5);
+    if(request){
+      request.error("ERROR");
+    }
+    const request2 = this.extractRequestMap.get(5);
+    if(request2)
+      request2.error("ERROR");
+  }
 
 }

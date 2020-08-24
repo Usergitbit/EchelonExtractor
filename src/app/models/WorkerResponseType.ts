@@ -1,5 +1,6 @@
 export enum WorkerResponseType {
     LoadCompleted,
     EchelonExtracted,
-    EchelonsCombined
+    EchelonsCombined,
+    Error
 }
