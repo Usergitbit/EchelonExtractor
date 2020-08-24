@@ -86,35 +86,34 @@ function handleCombineEchelonsRequest(data: IWorkerRequestMessageData): void {
 }
 
 function combineEchelons(images: Array<IImage>): ImageData {
-  const imageMats = new cv.MatVector();
-  let rows = 0;
-  let cols = 0;
+  let rows = images.reduce<number>((height, image2) => height + image2.height, 0);
+  let cols = images.reduce<number>((cols, image2) => {
+    if (cols > image2.width)
+      return cols;
+    else
+      return image2.width;
+  }, 0);
   let type = cv.CV_8UC4;
-  images.forEach(image => {
-    const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
-    const imageMat = cv.matFromImageData(imageData);
-    rows += imageMat.rows;
-    if (imageMat.cols > cols)
-      cols = imageMat.cols;
-    type = imageMat.type();
-    imageMats.push_back(imageMat);
-  });
 
   //hconcat didn't work so we do it manually
   let resultMat = cv.Mat.ones(rows, cols, type);
+
   let startRow = 0;
-  let endRow = imageMats.get(0).rows;
-  for (let i = 0; i < imageMats.size(); i++) {
-    const imageMat = imageMats.get(i);
+  let endRow = images[0].height;
+
+  for (let i = 0; i < images.length; i++) {
+    const image = images[i];
+    const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
+    const imageMat = cv.matFromImageData(imageData);
+    rows += imageMat.rows;
+    type = imageMat.type();
     imageMat.copyTo(resultMat.rowRange(startRow, endRow).colRange(0, imageMat.cols));
-    if (i != imageMats.size() - 1) {
+    if (i != images.length - 1) {
       startRow = endRow;
-      endRow += imageMats.get(i + 1).rows;
+      endRow += images[i + 1].height;
     }
     imageMat.delete();
   }
-
-  imageMats.delete();
 
   const result = imageDataFromMat(resultMat);
 
