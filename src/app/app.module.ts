@@ -8,14 +8,12 @@ import { environment } from '../environments/environment';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { BaseComponentComponent } from './shared/base-component/base-component.component';
 import { EchelonCanvasComponent } from './components/echelon-canvas/echelon-canvas.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
     AppComponent,
-    BaseComponentComponent,
     EchelonCanvasComponent
   ],
   imports: [

@@ -17,13 +17,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
       break;
     }
     case WorkerRequestType.ExtractEchelons: {
-      try {
         handleExtractEchelonRequest(data);
-      }
-      catch (Exception) {
-        console.log(Exception);
-        throw new Error(`${data.information.id}`);
-      }
       break;
     }
     case WorkerRequestType.CombineEchelons: {
@@ -35,7 +29,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   }
 });
 
-function handleLoadRequest(data: IWorkerRequestMessageData): void {
+async function handleLoadRequest(data: IWorkerRequestMessageData): Promise<any> {
   console.log("Recieved load request");
   (self as unknown as IModule)["Module"] = {
     wasmBinaryFile: 'assets/opencv/wasm/4.4/opencv_js.wasm',
@@ -45,9 +39,9 @@ function handleLoadRequest(data: IWorkerRequestMessageData): void {
       postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.id } });
     }
   };
-  (self as any)["currentRequestId"] = 0;
-  // Import Webassembly script
-  self.importScripts('./assets/opencv/wasm/3.4/opencv.js');
+  // script sets global cv variable to a factory function that returns a promise with the cv object
+  self.importScripts('./assets/opencv/wasm/4.4/opencv.js');
+  cv = await cv();
 }
 
 function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
@@ -140,9 +134,9 @@ function extractEchelons(image: IImage): Array<ImageData> {
 
   for (let i = 0; i < contours.size(); i++) {
     let contour = contours.get(i);
-    let approximation = new cv.Mat();
-    let perimeter = cv.arcLength(contour, true);
-    cv.approxPolyDP(contour, approximation, 0.04 * perimeter, true);
+    // let approximation = new cv.Mat();
+    // let perimeter = cv.arcLength(contour, true);
+    // cv.approxPolyDP(contour, approximation, 0.04 * perimeter, true);
 
     const rectangle = cv.boundingRect(contour);
     const aspectRatio = rectangle.width / rectangle.height;
@@ -159,7 +153,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
       imageDataResults.push(echelonImageData);
       resultMat.delete();
     }
-    approximation.delete();
+    //approximation.delete();
     contour.delete();
   }
 
@@ -195,7 +189,7 @@ function postResponse(response: IWorkerResponseMessageData): void {
 
 function locateFile(path: string, scriptDirectory: string): string {
   if (path === 'opencv_js.wasm') {
-    return scriptDirectory + "assets/opencv/wasm/3.4/" + path;
+    return scriptDirectory + "assets/opencv/wasm/4.4/" + path;
   }
   else {
     return scriptDirectory + path;
