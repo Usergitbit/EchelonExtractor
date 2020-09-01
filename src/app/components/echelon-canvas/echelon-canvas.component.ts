@@ -1,10 +1,10 @@
-import { Component, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Echelon } from 'src/app/models';
+import { Component, Input, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
+import { Echelon } from "src/app/models";
 
 @Component({
-  selector: 'app-echelon-canvas',
-  templateUrl: './echelon-canvas.component.html',
-  styleUrls: ['./echelon-canvas.component.scss']
+  selector: "app-echelon-canvas",
+  templateUrl: "./echelon-canvas.component.html",
+  styleUrls: ["./echelon-canvas.component.scss"]
 })
 export class EchelonCanvasComponent implements AfterViewInit {
 
@@ -27,7 +27,7 @@ export class EchelonCanvasComponent implements AfterViewInit {
     }
   }
 
-  public onClick() {
+  public onClick(): void {
     this.echelon.isSelected = !this.echelon.isSelected;
   }
 

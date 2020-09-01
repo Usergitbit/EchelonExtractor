@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import {
   IWorkerResponseMessageEvent, IWorkerRequestMessageData, WorkerResponseType,
   WorkerRequestType, IRequestInformation, IWorkerResponseMessageData, IRequestContent, IImage
 } from "../models";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class ImageProcessingService {
 
@@ -23,8 +23,8 @@ export class ImageProcessingService {
   }
 
   public load(): Observable<boolean> {
-    if (typeof Worker !== 'undefined') {
-      this.worker = new Worker('./open-cv.worker', { type: 'module' });
+    if (typeof Worker !== "undefined") {
+      this.worker = new Worker("./open-cv.worker", { type: "module" });
       this.worker.onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); }
       this.worker.onerror = (error) => { this.handleCriticalError(error); }
       const request = this.createRequestInformation(WorkerRequestType.Load);
@@ -39,8 +39,9 @@ export class ImageProcessingService {
 
   public extractEchelons(images: Array<ImageData>): Observable<Array<ImageData>> {
 
-    if (!images || images.length == 0)
+    if (!images || images.length == 0) {
       throw new Error("No image data provided!");
+    }
 
     const requestInformation = this.createRequestInformation(WorkerRequestType.ExtractEchelons);
     const requestContent = this.createRequestContent(images);
@@ -53,8 +54,9 @@ export class ImageProcessingService {
   }
 
   public combineEchelons(images: Array<ImageData>): Observable<ImageData> {
-    if (!images || images.length == 0)
+    if (!images || images.length == 0) {
       throw new Error("No image data provided");
+    }
 
     const requestInformation = this.createRequestInformation(WorkerRequestType.CombineEchelons);
     const requestContent = this.createRequestContent(images);
@@ -94,7 +96,7 @@ export class ImageProcessingService {
     const requestSubject = this.extractRequestMap.get(data.information.requestId);
 
     if (responseContent) {
-      let responseImages = new Array<ImageData>();
+      const responseImages = new Array<ImageData>();
       responseContent.images.forEach(image => {
         const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
         responseImages.push(imageData);
@@ -118,10 +120,12 @@ export class ImageProcessingService {
     if (responseContent) {
       const image = responseContent.images[0];
       let responseImageData;
-      if (image)
+      if (image) {
         responseImageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
-      else
+      }
+      else {
         responseImageData = new ImageData(1, 1);
+      }
 
       requestSubject?.next(responseImageData);
       requestSubject?.complete();
@@ -141,11 +145,13 @@ export class ImageProcessingService {
       extractRequest.error(responseInformation.message);
     }
     const combineRequest = this.combineRequestMap.get(responseInformation.requestId);
-    if (combineRequest)
+    if (combineRequest) {
       combineRequest.error(responseInformation.message);
+    }
 
-    if(data.information.requestId == 1)
+    if(data.information.requestId == 1) {
       this.isLoadedSubject.error(responseInformation.message);
+    }
   }
 
   private handleCriticalError(error: ErrorEvent): void {
@@ -165,7 +171,7 @@ export class ImageProcessingService {
 
   private createRequestContent(images: Array<ImageData>): IRequestContent {
 
-    let contentImages = new Array<IImage>();
+    const contentImages = new Array<IImage>();
     images.forEach(image => {
       contentImages.push({ imageArrayBuffer: image.data.buffer, width: image.width, height: image.height });
     });
@@ -173,12 +179,13 @@ export class ImageProcessingService {
     return { images: contentImages };
   }
 
-  private postRequest(request: IWorkerRequestMessageData) {
+  private postRequest(request: IWorkerRequestMessageData): void {
     if (request.content) {
       const arrayBuffers = request.content.images.map(image => image.imageArrayBuffer);
       this.worker.postMessage(request, arrayBuffers);
     }
-    else
+    else {
       this.worker.postMessage(request);
+    }
   }
 }

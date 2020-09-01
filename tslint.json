@@ -1,6 +1,8 @@
 {
   "extends": "tslint:recommended",
   "rules": {
+    "object-literal-shorthand": false,
+    "member-access": true,
     "align": {
       "options": [
         "parameters",
@@ -66,7 +68,7 @@
     ],
     "no-empty": false,
     "no-inferrable-types": [
-      true,
+      false,
       "ignore-params"
     ],
     "no-non-null-assertion": true,
@@ -79,7 +81,7 @@
     ],
     "quotemark": [
       true,
-      "single"
+      "double"
     ],
     "semicolon": {
       "options": [

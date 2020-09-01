@@ -4,9 +4,9 @@ export class Echelon {
     public imageData: ImageData = new ImageData(1, 1);
     public isSelected: boolean = true;
 
-    private _id: number = Echelon.idCounter++;
-    public get id(): number {
-        return this._id;
+    private id: number = Echelon.idCounter++;
+    public get Id(): number {
+        return this.id;
     }
 
     public constructor(imageData: ImageData, selected?: boolean) {

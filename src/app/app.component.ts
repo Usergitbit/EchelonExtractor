@@ -1,25 +1,25 @@
-import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit, ViewChild } from '@angular/core';
-import { fromEvent, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { ImageProcessingService } from './services/image-processing.service';
-import { Echelon } from './models';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { Component, ElementRef, ViewChildren, QueryList, AfterViewInit, ViewChild } from "@angular/core";
+import { fromEvent, of } from "rxjs";
+import { catchError } from "rxjs/operators";
+import { ImageProcessingService } from "./services/image-processing.service";
+import { Echelon } from "./models";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MessageSnackBarComponent } from './components/message-snack-bar/message-snack-bar.component';
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"]
 })
 export class AppComponent implements AfterViewInit {
 
-  @ViewChildren('canvasSelector')
+  @ViewChildren("canvasSelector")
   private selectedImagesCanvasesQueryList!: QueryList<ElementRef<HTMLCanvasElement>>;
-  @ViewChild('resultCanvas')
+  @ViewChild("resultCanvas")
   private resultCanvasElementRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('imgFileInput')
+  @ViewChild("imgFileInput")
   private imgFileInputRef!: ElementRef<HTMLInputElement>;
 
   public isReady = false;
@@ -47,16 +47,18 @@ export class AppComponent implements AfterViewInit {
     this.files = [];
     this.resultCanvasHidden = true;
     this.extractedEchelons = [];
-    let value = target as HTMLInputElement;
-    if (value == null || value.files == null || value.files.length == 0)
+    const value = target as HTMLInputElement;
+    if (value == null || value.files == null || value.files.length === 0) {
       return;
-    else
+    }
+    else {
+      // tslint:disable-next-line: prefer-for-of
       for (let i = 0; i < value.files.length; i++) {
         const file = value.files[i];
         this.files.push(file.name);
         const fileReader: FileReader = new FileReader();
 
-        const load$ = fromEvent<ProgressEvent<FileReader>>(fileReader, 'loadend');
+        const load$ = fromEvent<ProgressEvent<FileReader>>(fileReader, "loadend");
 
         load$.subscribe(result => {
           this.loadImageToCanvas(result, file.name);
@@ -64,25 +66,26 @@ export class AppComponent implements AfterViewInit {
 
         fileReader.readAsDataURL(file);
       }
+    }
   }
 
   private loadImageToCanvas(data: ProgressEvent<FileReader>, fileName: string): void {
     if (data != null && data.target != null) {
-      let img = new Image();
+      const image = new Image();
 
-      img.onload = (img) => {
-        let canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement;
-        let context = canvas?.getContext("2d");
-        let image = img.target as HTMLImageElement;
+      image.onload = (img) => {
+        const canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement;
+        const context = canvas?.getContext("2d");
+        const imageElement = img.target as HTMLImageElement;
 
         if (canvas) {
-          canvas.width = image.naturalWidth;
-          canvas.height = image.naturalHeight;
+          canvas.width = imageElement.naturalWidth;
+          canvas.height = imageElement.naturalHeight;
         }
-        context?.drawImage(image, 0, 0);
+        context?.drawImage(imageElement, 0, 0);
       }
 
-      img.src = data.target.result as string;
+      image.src = data.target.result as string;
     }
   }
 
@@ -134,10 +137,11 @@ export class AppComponent implements AfterViewInit {
       });
   }
 
-  private clearSelectedFiles() {
+  private clearSelectedFiles(): void {
     this.files = [];
-    var fileInput = this.imgFileInputRef?.nativeElement;
-    if (fileInput)
+    const fileInput = this.imgFileInputRef?.nativeElement;
+    if (fileInput) {
       fileInput.value = "";
+    }
   }
 }

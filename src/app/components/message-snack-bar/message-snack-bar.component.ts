@@ -1,10 +1,10 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
+import { Component, OnInit, Inject } from "@angular/core";
+import { MAT_SNACK_BAR_DATA } from "@angular/material/snack-bar";
 
 @Component({
-  selector: 'app-message-snack-bar',
-  templateUrl: './message-snack-bar.component.html',
-  styleUrls: ['./message-snack-bar.component.scss']
+  selector: "app-message-snack-bar",
+  templateUrl: "./message-snack-bar.component.html",
+  styleUrls: ["./message-snack-bar.component.scss"]
 })
 export class MessageSnackBarComponent implements OnInit {
 

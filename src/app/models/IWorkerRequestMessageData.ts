@@ -1,5 +1,5 @@
 import { IRequestInformation } from ".";
-import { IRequestContent } from './IRequestContent';
+import { IRequestContent } from "./IRequestContent";
 
 export interface IWorkerRequestMessageData {
     content?: IRequestContent;

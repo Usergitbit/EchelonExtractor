@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+// tslint:disable-next-line: no-any
 declare var cv: any;
 import {
   IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType,
@@ -6,6 +7,7 @@ import {
 } from "../models";
 
 export interface IModule extends WorkerGlobalScope {
+  // tslint:disable-next-line: no-any
   Module: any;
 }
 
@@ -44,31 +46,33 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   }
 });
 
-async function handleLoadRequest(data: IWorkerRequestMessageData): Promise<any> {
+async function handleLoadRequest(data: IWorkerRequestMessageData): Promise<void> {
   console.log("Recieved load request");
+  // tslint:disable-next-line: no-string-literal
   (self as unknown as IModule)["Module"] = {
-    wasmBinaryFile: 'assets/opencv/wasm/4.4/opencv_js.wasm',
+    wasmBinaryFile: "assets/opencv/wasm/4.4/opencv_js.wasm",
     usingWasm: true,
     locateFile: locateFile,
     onRuntimeInitialized: () => {
-      //postResponse( {information: { responseType: WorkerResponseType.Error, requestId: data.information.id, message: "dummy error"}  });
+      // postResponse( {information: { responseType: WorkerResponseType.Error, requestId: data.information.id, message: "dummy error"}  });
       postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.id } });
     }
   };
   // script sets global cv variable to a factory function that returns a promise with the cv object
-  self.importScripts('./assets/opencv/wasm/4.4/opencv.js');
+  self.importScripts("./assets/opencv/wasm/4.4/opencv.js");
   cv = await cv();
 }
 
 function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
-  if (!data.content)
+  if (!data.content) {
     throw new Error("Image content must not be null or undefined");
+  }
 
   const images = data.content.images;
-  let extractedEchelons = new Array<ImageData>();
+  const extractedEchelons = new Array<ImageData>();
 
-  for (let i = 0; i < images.length; i++) {
-    const results = extractEchelons(images[i]);
+  for (const image of images) {
+    const results = extractEchelons(image);
     results.forEach(result => {
       extractedEchelons.push(result);
     });
@@ -81,8 +85,9 @@ function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
 }
 
 function handleCombineEchelonsRequest(data: IWorkerRequestMessageData): void {
-  if (!data.content)
+  if (!data.content) {
     throw new Error("Image content must not be null or undefined");
+  }
 
   const images = data.content.images;
   const result = combineEchelons(images);
@@ -102,16 +107,18 @@ function handleError(error: IWorkerError, data: IWorkerRequestMessageData): void
 
 function combineEchelons(images: Array<IImage>): ImageData {
   let rows = images.reduce<number>((height, image2) => height + image2.height, 0);
-  let cols = images.reduce<number>((cols, image2) => {
-    if (cols > image2.width)
+  const columns = images.reduce<number>((cols, image2) => {
+    if (cols > image2.width) {
       return cols;
-    else
+    }
+    else {
       return image2.width;
+    }
   }, 0);
   let type = cv.CV_8UC4;
 
-  //hconcat didn't work so we do it manually
-  let resultMat = cv.Mat.ones(rows, cols, type);
+  // hconcat didn't work so we do it manually
+  const resultMat = cv.Mat.ones(rows, columns, type);
 
   let startRow = 0;
   let endRow = images[0].height;
@@ -123,7 +130,7 @@ function combineEchelons(images: Array<IImage>): ImageData {
     rows += imageMat.rows;
     type = imageMat.type();
     imageMat.copyTo(resultMat.rowRange(startRow, endRow).colRange(0, imageMat.cols));
-    if (i != images.length - 1) {
+    if (i !== images.length - 1) {
       startRow = endRow;
       endRow += images[i + 1].height;
     }
@@ -142,21 +149,21 @@ function extractEchelons(image: IImage): Array<ImageData> {
 
   const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
   const initialMat = cv.matFromImageData(imageData);
-  let processedMat = cv.matFromImageData(imageData);
-  //let destinationMat = cv.Mat.zeros(processedMat.rows, processedMat.cols, cv.CV_8UC3);
+  const processedMat = cv.matFromImageData(imageData);
+  // let destinationMat = cv.Mat.zeros(processedMat.rows, processedMat.cols, cv.CV_8UC3);
 
-  //grayscale
+  // grayscale
   cv.cvtColor(processedMat, processedMat, cv.COLOR_RGBA2GRAY, 0);
-  //threshold numbers were determined experimentally
+  // threshold numbers were determined experimentally
   cv.threshold(processedMat, processedMat, 50, 250, cv.THRESH_BINARY);
 
-  let contours = new cv.MatVector();
+  const contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
   cv.findContours(processedMat, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
   const imageDataResults = new Array<ImageData>();
 
   for (let i = 0; i < contours.size(); i++) {
-    let contour = contours.get(i);
+    const contour = contours.get(i);
     // let approximation = new cv.Mat();
     // let perimeter = cv.arcLength(contour, true);
     // cv.approxPolyDP(contour, approximation, 0.04 * perimeter, true);
@@ -176,7 +183,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
       imageDataResults.push(echelonImageData);
       resultMat.delete();
     }
-    //approximation.delete();
+    // approximation.delete();
     contour.delete();
   }
 
@@ -194,9 +201,9 @@ function createResponseInformation(responseType: WorkerResponseType, requestId: 
 }
 
 function createResponseContent(imageData: Array<ImageData>): IResponseContent {
-  let responseImages = new Array<IImage>();
-  imageData.forEach(imageData => {
-    responseImages.push({ imageArrayBuffer: imageData.data.buffer, height: imageData.height, width: imageData.width });
+  const responseImages = new Array<IImage>();
+  imageData.forEach(imgData => {
+    responseImages.push({ imageArrayBuffer: imgData.data.buffer, height: imgData.height, width: imgData.width });
   });
   return { images: responseImages };
 }
@@ -206,12 +213,13 @@ function postResponse(response: IWorkerResponseMessageData): void {
     const arrayBuffers = response.content.images.map(image => image.imageArrayBuffer);
     postMessage(response, arrayBuffers);
   }
-  else
+  else {
     postMessage(response);
+  }
 }
 
 function locateFile(path: string, scriptDirectory: string): string {
-  if (path === 'opencv_js.wasm') {
+  if (path === "opencv_js.wasm") {
     return scriptDirectory + "assets/opencv/wasm/4.4/" + path;
   }
   else {
@@ -219,6 +227,7 @@ function locateFile(path: string, scriptDirectory: string): string {
   }
 }
 
+// tslint:disable-next-line: no-any
 function imageDataFromMat(mat: any): ImageData {
   // converts the mat type to cv.CV_8U
   const img = new cv.Mat();
@@ -239,7 +248,7 @@ function imageDataFromMat(mat: any): ImageData {
       break;
     default:
       throw new Error(
-        'Bad number of channels (Source image must have 1, 3 or 4 channels)'
+        "Bad number of channels (Source image must have 1, 3 or 4 channels)"
       );
   }
   const imageData = new ImageData(
