@@ -10,7 +10,7 @@ export * from "./IResponseInformation";
 export * from "./IWorkerResponseMessageData";
 export * from "./IWorkerResponseMessageEvent";
 export * from "./Echelon";
-
+export * from "./IWorkerError";
 
 
 

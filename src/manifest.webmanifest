@@ -1,8 +1,8 @@
 {
   "name": "EchelonExtractor",
   "short_name": "EchelonExtractor",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "theme_color": "#292e2a",
+  "background_color": "#4b4b4d",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

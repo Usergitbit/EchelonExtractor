@@ -5,6 +5,8 @@ import { ImageProcessingService } from './services/image-processing.service';
 import { Echelon } from './models';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageSnackBarComponent } from './components/message-snack-bar/message-snack-bar.component';
 
 @Component({
   selector: 'app-root',
@@ -28,12 +30,13 @@ export class AppComponent implements AfterViewInit {
   public faQuestionCircle = faQuestionCircle;
   public resultCanvasHidden = true;
 
-  public constructor(private imageProcessingService: ImageProcessingService) {
+  public constructor(private snackBar: MatSnackBar, private imageProcessingService: ImageProcessingService) {
   }
 
   public ngAfterViewInit(): void {
     this.imageProcessingService.load().pipe(catchError(error => {
       console.log(error);
+      this.snackBar.openFromComponent(MessageSnackBarComponent, { data: `There was an error loading OpenCV: ${error}` });
       return of(false);
     })).subscribe(loadResult => {
       this.isReady = loadResult;
@@ -106,6 +109,7 @@ export class AppComponent implements AfterViewInit {
       },
         error => {
           console.log(error);
+          this.snackBar.openFromComponent(MessageSnackBarComponent, { data: `There was an error extracting echelons: ${error}` });
         });
   }
 
@@ -123,13 +127,17 @@ export class AppComponent implements AfterViewInit {
         const context = canvas.getContext("2d");
         context?.putImageData(data, 0, 0);
         this.resultCanvasHidden = false;
+      },
+      error => {
+        console.log(error);
+        this.snackBar.openFromComponent(MessageSnackBarComponent, { data: `There was an error combining echelons: ${error}` });
       });
   }
-  
+
   private clearSelectedFiles() {
     this.files = [];
     var fileInput = this.imgFileInputRef?.nativeElement;
-    if(fileInput)
+    if (fileInput)
       fileInput.value = "";
   }
 }

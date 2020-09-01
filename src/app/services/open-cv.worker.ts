@@ -2,7 +2,7 @@
 declare var cv: any;
 import {
   IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType,
-  IResponseContent, IResponseInformation, IImage, IWorkerRequestMessageData
+  IResponseContent, IResponseInformation, IImage, IWorkerRequestMessageData, IWorkerError
 } from "../models";
 
 export interface IModule extends WorkerGlobalScope {
@@ -13,15 +13,30 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
   const data = messageEvent.data;
   switch (data.information.requestType) {
     case WorkerRequestType.Load: {
-      handleLoadRequest(data);
+      try {
+        handleLoadRequest(data);
+      }
+      catch (error) {
+        handleError(error, data);
+      }
       break;
     }
     case WorkerRequestType.ExtractEchelons: {
+      try {
         handleExtractEchelonRequest(data);
+      }
+      catch (error) {
+        handleError(error, data);
+      }
       break;
     }
     case WorkerRequestType.CombineEchelons: {
-      handleCombineEchelonsRequest(data);
+      try {
+        handleCombineEchelonsRequest(data);
+      }
+      catch (error) {
+        handleError(error, data);
+      }
       break;
     }
     default:
@@ -36,6 +51,7 @@ async function handleLoadRequest(data: IWorkerRequestMessageData): Promise<any> 
     usingWasm: true,
     locateFile: locateFile,
     onRuntimeInitialized: () => {
+      //postResponse( {information: { responseType: WorkerResponseType.Error, requestId: data.information.id, message: "dummy error"}  });
       postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.id } });
     }
   };
@@ -58,7 +74,7 @@ function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
     });
   }
 
-  const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id, true);
+  const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id);
   const responseContent = createResponseContent(extractedEchelons);
 
   postResponse({ information: responseInformation, content: responseContent });
@@ -71,10 +87,17 @@ function handleCombineEchelonsRequest(data: IWorkerRequestMessageData): void {
   const images = data.content.images;
   const result = combineEchelons(images);
 
-  const responseInformation = createResponseInformation(WorkerResponseType.EchelonsCombined, data.information.id, true);
+  const responseInformation = createResponseInformation(WorkerResponseType.EchelonsCombined, data.information.id);
   const responseContent = createResponseContent(new Array<ImageData>(result));
 
   postResponse({ information: responseInformation, content: responseContent });
+}
+
+function handleError(error: IWorkerError, data: IWorkerRequestMessageData): void {
+  const errorMessage = `There was an error processing the request. Message:${error.message}. Line number ${error.lineno} Column number: ${error.colno}`;
+  const responseInformation = createResponseInformation(WorkerResponseType.Error, data.information.id, errorMessage);
+
+  postResponse({ information: responseInformation });
 }
 
 function combineEchelons(images: Array<IImage>): ImageData {
@@ -166,8 +189,8 @@ function extractEchelons(image: IImage): Array<ImageData> {
 }
 
 
-function createResponseInformation(responseType: WorkerResponseType, requestId: number, requestCompleted?: boolean): IResponseInformation {
-  return { requestId: requestId, responseType: responseType, requestCompleted: requestCompleted };
+function createResponseInformation(responseType: WorkerResponseType, requestId: number, message?: string): IResponseInformation {
+  return { requestId: requestId, responseType: responseType, message: message };
 }
 
 function createResponseContent(imageData: Array<ImageData>): IResponseContent {

@@ -26,14 +26,13 @@ export class ImageProcessingService {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker('./open-cv.worker', { type: 'module' });
       this.worker.onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); }
-      this.worker.onerror = (error) => { this.handleErrorMessage(error); }
+      this.worker.onerror = (error) => { this.handleCriticalError(error); }
       const request = this.createRequestInformation(WorkerRequestType.Load);
       console.log("Sending load request.");
       this.postRequest({ information: request });
     }
     else {
-      this.isLoadedSubject.error("Web workers are not supported. The application can not run on this browser");
-      console.log("Web workers not supported");
+      this.isLoadedSubject.error("Web workers are not supported. The application can not run on this browser.");
     }
     return this.isLoadedSubject.asObservable();
   }
@@ -80,6 +79,9 @@ export class ImageProcessingService {
       case WorkerResponseType.EchelonsCombined:
         this.handleEchelonCombinedResponse(data);
         break;
+      case WorkerResponseType.Error:
+        this.handleErrorResponse(data);
+        break;
       default:
         throw new Error(`Reponse type ${data.information.responseType} not implemented`);
     }
@@ -98,14 +100,11 @@ export class ImageProcessingService {
         responseImages.push(imageData);
       });
       requestSubject?.next(responseImages);
+      requestSubject?.complete();
+      this.extractRequestMap.delete(responseInformation.requestId);
     }
     else {
       requestSubject?.error(`Missing payload for request ${responseInformation.requestId}`);
-      this.extractRequestMap.delete(responseInformation.requestId);
-    }
-
-    if (responseInformation.requestCompleted) {
-      requestSubject?.complete();
       this.extractRequestMap.delete(responseInformation.requestId);
     }
   }
@@ -125,18 +124,38 @@ export class ImageProcessingService {
         responseImageData = new ImageData(1, 1);
 
       requestSubject?.next(responseImageData);
+      requestSubject?.complete();
+      this.extractRequestMap.delete(responseInformation.requestId);
     }
 
     else {
       requestSubject?.error(`Missing payload for request ${responseInformation.requestId}`);
       this.combineRequestMap.delete(responseInformation.requestId);
     }
+  }
 
-    if (responseInformation.requestCompleted) {
-      requestSubject?.complete();
-      this.extractRequestMap.delete(responseInformation.requestId);
+  private handleErrorResponse(data: IWorkerResponseMessageData): void {
+    const responseInformation = data.information;
+    const extractRequest = this.extractRequestMap.get(responseInformation.requestId);
+    if (extractRequest) {
+      extractRequest.error(responseInformation.message);
     }
+    const combineRequest = this.combineRequestMap.get(responseInformation.requestId);
+    if (combineRequest)
+      combineRequest.error(responseInformation.message);
 
+    if(data.information.requestId == 1)
+      this.isLoadedSubject.error(responseInformation.message);
+  }
+
+  private handleCriticalError(error: ErrorEvent): void {
+    const errorMessage = `An unexpected error has occured: ${error.message} at line ${error.lineno} collumn ${error.colno}`;
+    this.combineRequestMap.forEach(request => {
+      request.error(errorMessage);
+    });
+    this.extractRequestMap.forEach(request => {
+      request.error(errorMessage);
+    });
   }
 
   private createRequestInformation(requestTypeParameter: WorkerRequestType): IRequestInformation {
@@ -162,16 +181,4 @@ export class ImageProcessingService {
     else
       this.worker.postMessage(request);
   }
-
-  private handleErrorMessage(error: any): void {
-    console.log(`WASM ERROR'D REQUEST ID ${error.target.currentRequestId}`);
-    const request = this.extractRequestMap.get(5);
-    if(request){
-      request.error("ERROR");
-    }
-    const request2 = this.extractRequestMap.get(5);
-    if(request2)
-      request2.error("ERROR");
-  }
-
 }

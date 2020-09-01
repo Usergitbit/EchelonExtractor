@@ -10,17 +10,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { EchelonCanvasComponent } from './components/echelon-canvas/echelon-canvas.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MessageSnackBarComponent } from './components/message-snack-bar/message-snack-bar.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    EchelonCanvasComponent
+    EchelonCanvasComponent,
+    MessageSnackBarComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
     FlexLayoutModule,
     MatButtonModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
