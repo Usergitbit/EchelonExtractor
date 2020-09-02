@@ -84,7 +84,7 @@ export class AppComponent implements AfterViewInit {
           canvas.height = imageElement.naturalHeight;
         }
         context?.drawImage(imageElement, 0, 0);
-      }
+      };
 
       image.src = data.target.result as string;
     }
