@@ -1,0 +1,90 @@
+{
+  "configVersion": 1,
+  "timestamp": 1599068533940,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/0.848642044a5a91a8ee55.worker.js",
+        "/favicon.ico",
+        "/index.html",
+        "/main.fa2575eed6f03c50a17c.js",
+        "/manifest.webmanifest",
+        "/polyfills.a4021de53358bb0fec14.js",
+        "/runtime.e227d1a0e31cbccbf8ec.js",
+        "/styles.b99a53fe5b7dbedc8405.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/assets/icons/icon-128x128.png",
+        "/assets/icons/icon-144x144.png",
+        "/assets/icons/icon-152x152.png",
+        "/assets/icons/icon-192x192.png",
+        "/assets/icons/icon-384x384.png",
+        "/assets/icons/icon-512x512.png",
+        "/assets/icons/icon-72x72.png",
+        "/assets/icons/icon-96x96.png",
+        "/assets/images/griffinAndKryugerLogoWhite.png",
+        "/assets/images/ribdiedinside.png",
+        "/assets/opencv/wasm/4.4/opencv.js",
+        "/assets/opencv/wasm/4.4/opencv_js.wasm"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/0.848642044a5a91a8ee55.worker.js": "e5507a88e9bebe6f0b984fdbab791edc54946e48",
+    "/assets/icons/icon-128x128.png": "6af5d991d55ce2a22a3b762bd5cf6cf2ee9de058",
+    "/assets/icons/icon-144x144.png": "ba03b09383161851ab928e7d24679422ac715f3d",
+    "/assets/icons/icon-152x152.png": "580c78eb03c46392f969364cac5823771151b9f8",
+    "/assets/icons/icon-192x192.png": "22b19fa8ce86b3309d2d51f2e464dc4371ec70ff",
+    "/assets/icons/icon-384x384.png": "1343557f5e91ec9909271a888d79710c1093c3e0",
+    "/assets/icons/icon-512x512.png": "f6f90f7c06bc854a1fc9d0dfb47664130f3ae1ed",
+    "/assets/icons/icon-72x72.png": "ba85fc949095653f6fa52d22b3e9bf755793cca1",
+    "/assets/icons/icon-96x96.png": "03638e9c056c8e1a19dea6f5d0793822c65bf970",
+    "/assets/images/griffinAndKryugerLogoWhite.png": "b9ebb017b9432531f121b3cb22ae9451ef584e2b",
+    "/assets/images/ribdiedinside.png": "a98175924c637407ce299981e42b6478ef829008",
+    "/assets/opencv/wasm/4.4/opencv.js": "eece8ccef869e3bea1dd1ce1f5169c7081a67f76",
+    "/assets/opencv/wasm/4.4/opencv_js.wasm": "ad2ec8cb3251c34a846abb2e94b792b72fe8cca6",
+    "/favicon.ico": "fbb4e4f8c9968f0569ad7b13b7956e97ad313400",
+    "/index.html": "6479cd9b0cdf50f0cc5160a300785ccab8712a06",
+    "/main.fa2575eed6f03c50a17c.js": "2b9dbe149aa64a4c667fd305aef6ccf92e0ec358",
+    "/manifest.webmanifest": "f947677449a688b128110f85b334921f85d5949a",
+    "/polyfills.a4021de53358bb0fec14.js": "b47435a9ef2a4829f2f9dfd35599bde3614981b1",
+    "/runtime.e227d1a0e31cbccbf8ec.js": "a9aafcf49f49145093fc831efd9b8e2f6c71bb9c",
+    "/styles.b99a53fe5b7dbedc8405.css": "30eebf37e6ce19347710bd25b259f5658c4b61b7"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ]
+}
