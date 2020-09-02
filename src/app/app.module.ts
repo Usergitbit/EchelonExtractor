@@ -10,8 +10,9 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { EchelonCanvasComponent } from "./components/echelon-canvas/echelon-canvas.component";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import {MatSnackBarModule} from "@angular/material/snack-bar";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
+import { MatIconModule } from "@angular/material/icon";
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import { MessageSnackBarComponent } from "./components/message-snack-bar/message
     MatSnackBarModule,
     FlexLayoutModule,
     MatButtonModule,
+    MatIconModule,
     ServiceWorkerModule.register("ngsw-worker.js", { enabled: environment.production }),
     FontAwesomeModule
   ],

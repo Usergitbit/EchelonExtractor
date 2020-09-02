@@ -4,7 +4,7 @@ import { catchError } from "rxjs/operators";
 import { ImageProcessingService } from "./services/image-processing.service";
 import { Echelon } from "./models";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
+import { faQuestionCircle, faArrowAltCircleDown } from "@fortawesome/free-regular-svg-icons";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
 
@@ -28,6 +28,7 @@ export class AppComponent implements AfterViewInit {
   public extractedEchelons = new Array<Echelon>();
   public faGithub = faGithub;
   public faQuestionCircle = faQuestionCircle;
+  public faArrowAltCircleDown = faArrowAltCircleDown;
   public resultCanvasHidden = true;
 
   public constructor(private snackBar: MatSnackBar, private imageProcessingService: ImageProcessingService) {
@@ -143,5 +144,13 @@ export class AppComponent implements AfterViewInit {
     if (fileInput) {
       fileInput.value = "";
     }
+  }
+
+  public onDownloadClick(): void {
+    const image = this.resultCanvasElementRef.nativeElement.toDataURL("image/jpg", 1.0);
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = "echelons.jpg";
+    a.click();
   }
 }
