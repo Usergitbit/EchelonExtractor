@@ -1,6 +1,6 @@
 # EchelonExtractor
 
-This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/) to extract your echelons from screenshots of your ID card into a single compact image. It is built using Angular 10 and OpenCVJS 4.4 (webassembly version running in a web worker). It is available online [here](https://usergitbit.github.io/EchelonExtractor/) and can also be installed as PWA. See [wiki](https://github.com/Usergitbit/EchelonExtractor/wiki) for usage.
+This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/) to extract your echelons from screenshots of your ID card into a single compact image. It is built using Angular 10 and OpenCVJS 4.4 (webassembly version running in a web worker). It is available online [here](https://usergitbit.github.io/EchelonExtractor/) and can also be installed as PWA. See [wiki](https://github.com/Usergitbit/EchelonExtractor/wiki/How-to-use) for usage.
 
 ## Building for development
 
