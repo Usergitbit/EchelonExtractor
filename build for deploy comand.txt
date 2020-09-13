@@ -1,1 +1,2 @@
+ng build --base-href=/EchelonExtractor/ --prod
 ng deploy --base-href=/EchelonExtractor/ --no-build
