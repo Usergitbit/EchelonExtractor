@@ -2,5 +2,6 @@ opencv.js -linguist-vendored
 opencv_js.wasm -linguist-vendored
 opencv/* linguist-vendored
 assets/opencv/wasm/3.4/* linguist-vendored
+assets/opencv/wasm/4.4/* linguist-vendored
 assets/opencv/asm/3.4/* linguist-vendored
 assets/opencv/data/haarcascades/* linguist-vendored
