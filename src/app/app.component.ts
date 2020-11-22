@@ -7,6 +7,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faQuestionCircle, faArrowAltCircleDown } from "@fortawesome/free-regular-svg-icons";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
+import { environment } from "../environments/environment";
 
 @Component({
   selector: "app-root",
@@ -22,6 +23,7 @@ export class AppComponent implements AfterViewInit {
   @ViewChild("imgFileInput")
   private imgFileInputRef!: ElementRef<HTMLInputElement>;
 
+  public environment = environment;
   public isReady = false;
   public isWorking = false;
   public files = new Array<string>();
