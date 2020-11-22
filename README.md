@@ -16,6 +16,8 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 
 ## Change Log
 
+22 November 2020 - v1.2.0 Added multi-threading support
+
 22 November 2020 - v1.1 Angular10 -> Angular11
 
 02 September 2020 - v1.0 Initial release
