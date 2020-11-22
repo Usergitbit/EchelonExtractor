@@ -103,13 +103,20 @@ export class AppComponent implements AfterViewInit {
     });
 
     this.clearSelectedFiles();
-
+    
+    const t0 = performance.now();
     this.imageProcessingService.extractEchelons(selectedImagesdata)
       .subscribe(images => {
+
+        this.extractedEchelons = [];
         this.isWorking = false;
         images.forEach(imageData => {
           this.extractedEchelons.push(new Echelon(imageData));
         });
+
+        const t1 = performance.now();
+        console.log("Echelon extraction took " + (t1 - t0) + " milliseconds.");
+
       },
         error => {
           console.log(error);
@@ -132,10 +139,10 @@ export class AppComponent implements AfterViewInit {
         context?.putImageData(data, 0, 0);
         this.resultCanvasHidden = false;
       },
-      error => {
-        console.log(error);
-        this.snackBar.openFromComponent(MessageSnackBarComponent, { data: `There was an error combining echelons: ${error}` });
-      });
+        error => {
+          console.log(error);
+          this.snackBar.openFromComponent(MessageSnackBarComponent, { data: `There was an error combining echelons: ${error}` });
+        });
   }
 
   private clearSelectedFiles(): void {

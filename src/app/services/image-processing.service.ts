@@ -4,32 +4,41 @@ import {
   IWorkerResponseMessageEvent, IWorkerRequestMessageData, WorkerResponseType,
   WorkerRequestType, IRequestInformation, IWorkerResponseMessageData, IRequestContent, IImage
 } from "../models";
+import { ProcessingUnit } from "../models/ProcessingUnit";
 
 @Injectable({
   providedIn: "root"
 })
 export class ImageProcessingService {
 
-  private id = 1;
+  private requestId = 1;
 
-  private worker!: Worker;
+  private workerPool: Array<Worker> = new Array<Worker>();
 
   private isLoadedSubject = new BehaviorSubject<boolean>(false);
 
-  private extractRequestMap = new Map<number, Subject<Array<ImageData>>>();
+  private processingUnitsMap = new Map<number, ProcessingUnit>();
+
   private combineRequestMap = new Map<number, Subject<ImageData>>();
 
+  private availableThreads = 4;
   constructor() {
   }
 
   public load(): Observable<boolean> {
     if (typeof Worker !== "undefined") {
-      this.worker = new Worker("./open-cv.worker", { type: "module" });
-      this.worker.onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); }
-      this.worker.onerror = (error) => { this.handleCriticalError(error); }
-      const request = this.createRequestInformation(WorkerRequestType.Load);
-      console.log("Sending load request.");
-      this.postRequest({ information: request });
+
+      this.availableThreads = navigator.hardwareConcurrency;
+
+      for (let i = 0; i < this.availableThreads; i++) {
+        this.workerPool[i] = new Worker("./open-cv.worker", { type: "module" });
+        this.workerPool[i].onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); };
+        this.workerPool[i].onerror = (error) => { this.handleCriticalError(error); };
+        const request = this.createRequestInformation(new ProcessingUnit(1), WorkerRequestType.Load);
+        console.log("Sending load request.");
+        this.postRequest(this.workerPool[i], { information: request });
+      }
+
     }
     else {
       this.isLoadedSubject.error("Web workers are not supported. The application can not run on this browser.");
@@ -39,31 +48,42 @@ export class ImageProcessingService {
 
   public extractEchelons(images: Array<ImageData>): Observable<Array<ImageData>> {
 
-    if (!images || images.length == 0) {
+    if (!images || images.length === 0) {
       throw new Error("No image data provided!");
     }
 
-    const requestInformation = this.createRequestInformation(WorkerRequestType.ExtractEchelons);
-    const requestContent = this.createRequestContent(images);
-    const observableEchelonCollection = new Subject<Array<ImageData>>();
+    const processingUnit = new ProcessingUnit(images.length);
+    this.processingUnitsMap.set(processingUnit.Id, processingUnit);
 
-    this.extractRequestMap.set(+requestInformation.id, observableEchelonCollection);
-    this.postRequest({ information: requestInformation, content: requestContent });
+    let i = 0;
+    for (const image of images) {
+      const requestInformation = this.createRequestInformation(processingUnit, WorkerRequestType.ExtractEchelons);
+      const requestContent = this.createRequestContent([image]);
+      this.postRequest(this.workerPool[i], { information: requestInformation, content: requestContent });
 
-    return observableEchelonCollection.asObservable();
+      if (i < this.availableThreads - 1) {
+        i++;
+      }
+      else {
+        // if we have more images than workers then loop through them again
+        i = 0;
+      }
+    }
+
+    return processingUnit.asObservable();
   }
 
   public combineEchelons(images: Array<ImageData>): Observable<ImageData> {
-    if (!images || images.length == 0) {
+    if (!images || images.length === 0) {
       throw new Error("No image data provided");
     }
 
-    const requestInformation = this.createRequestInformation(WorkerRequestType.CombineEchelons);
+    const requestInformation = this.createRequestInformation(new ProcessingUnit(1), WorkerRequestType.CombineEchelons);
     const requestContent = this.createRequestContent(images);
     const observableEchelon = new Subject<ImageData>();
 
-    this.combineRequestMap.set(requestInformation.id, observableEchelon);
-    this.postRequest({ information: requestInformation, content: requestContent });
+    this.combineRequestMap.set(requestInformation.requestId, observableEchelon);
+    this.postRequest(this.workerPool[0], { information: requestInformation, content: requestContent });
 
     return observableEchelon.asObservable();
   }
@@ -89,11 +109,12 @@ export class ImageProcessingService {
     }
   }
 
+
   private handleEchelonExtractedResponse(data: IWorkerResponseMessageData): void {
 
     const responseInformation = data.information;
     const responseContent = data.content;
-    const requestSubject = this.extractRequestMap.get(data.information.requestId);
+    const processingUnit = this.processingUnitsMap.get(responseInformation.processingUnitId);
 
     if (responseContent) {
       const responseImages = new Array<ImageData>();
@@ -101,13 +122,13 @@ export class ImageProcessingService {
         const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
         responseImages.push(imageData);
       });
-      requestSubject?.next(responseImages);
-      requestSubject?.complete();
-      this.extractRequestMap.delete(responseInformation.requestId);
+      processingUnit?.next(responseImages);
+      if (processingUnit?.isFinished()) {
+        this.processingUnitsMap.delete(processingUnit.Id);
+      }
     }
     else {
-      requestSubject?.error(`Missing payload for request ${responseInformation.requestId}`);
-      this.extractRequestMap.delete(responseInformation.requestId);
+      processingUnit?.error(`No response content for ${processingUnit.Id}`);
     }
   }
 
@@ -129,7 +150,7 @@ export class ImageProcessingService {
 
       requestSubject?.next(responseImageData);
       requestSubject?.complete();
-      this.extractRequestMap.delete(responseInformation.requestId);
+      this.combineRequestMap.delete(responseInformation.requestId);
     }
 
     else {
@@ -140,16 +161,17 @@ export class ImageProcessingService {
 
   private handleErrorResponse(data: IWorkerResponseMessageData): void {
     const responseInformation = data.information;
-    const extractRequest = this.extractRequestMap.get(responseInformation.requestId);
-    if (extractRequest) {
-      extractRequest.error(responseInformation.message);
+    const processingUnit = this.processingUnitsMap.get(responseInformation.processingUnitId);
+
+    if (processingUnit) {
+      processingUnit.error(responseInformation.message);
     }
     const combineRequest = this.combineRequestMap.get(responseInformation.requestId);
     if (combineRequest) {
       combineRequest.error(responseInformation.message);
     }
 
-    if(data.information.requestId == 1) {
+    if (data.information.requestId === 1) {
       this.isLoadedSubject.error(responseInformation.message);
     }
   }
@@ -159,14 +181,14 @@ export class ImageProcessingService {
     this.combineRequestMap.forEach(request => {
       request.error(errorMessage);
     });
-    this.extractRequestMap.forEach(request => {
+    this.processingUnitsMap.forEach(request => {
       request.error(errorMessage);
     });
   }
 
-  private createRequestInformation(requestTypeParameter: WorkerRequestType): IRequestInformation {
-    const requestId = this.id++;
-    return { requestType: requestTypeParameter, id: requestId };
+  private createRequestInformation(processingUnit: ProcessingUnit, requestTypeParameter: WorkerRequestType): IRequestInformation {
+    const requestId = this.requestId++;
+    return { requestType: requestTypeParameter, requestId: requestId, processingUnitId: processingUnit.Id };
   }
 
   private createRequestContent(images: Array<ImageData>): IRequestContent {
@@ -179,13 +201,13 @@ export class ImageProcessingService {
     return { images: contentImages };
   }
 
-  private postRequest(request: IWorkerRequestMessageData): void {
+  private postRequest(worker: Worker, request: IWorkerRequestMessageData): void {
     if (request.content) {
       const arrayBuffers = request.content.images.map(image => image.imageArrayBuffer);
-      this.worker.postMessage(request, arrayBuffers);
+      worker.postMessage(request, arrayBuffers);
     }
     else {
-      this.worker.postMessage(request);
+      worker.postMessage(request);
     }
   }
 }

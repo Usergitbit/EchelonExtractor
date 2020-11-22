@@ -2,5 +2,6 @@ import { WorkerRequestType } from ".";
 
 export interface IRequestInformation {
     requestType: WorkerRequestType;
-    id: number;
+    requestId: number;
+    processingUnitId: number;
 }

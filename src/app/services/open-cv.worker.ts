@@ -55,7 +55,7 @@ async function handleLoadRequest(data: IWorkerRequestMessageData): Promise<void>
     locateFile: locateFile,
     onRuntimeInitialized: () => {
       // postResponse( {information: { responseType: WorkerResponseType.Error, requestId: data.information.id, message: "dummy error"}  });
-      postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.id } });
+      postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.requestId, processingUnitId: data.information.processingUnitId } });
     }
   };
   // script sets global cv variable to a factory function that returns a promise with the cv object
@@ -78,7 +78,7 @@ function handleExtractEchelonRequest(data: IWorkerRequestMessageData): void {
     });
   }
 
-  const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.id);
+  const responseInformation = createResponseInformation(WorkerResponseType.EchelonExtracted, data.information.requestId, data.information.processingUnitId);
   const responseContent = createResponseContent(extractedEchelons);
 
   postResponse({ information: responseInformation, content: responseContent });
@@ -92,7 +92,7 @@ function handleCombineEchelonsRequest(data: IWorkerRequestMessageData): void {
   const images = data.content.images;
   const result = combineEchelons(images);
 
-  const responseInformation = createResponseInformation(WorkerResponseType.EchelonsCombined, data.information.id);
+  const responseInformation = createResponseInformation(WorkerResponseType.EchelonsCombined, data.information.requestId, data.information.processingUnitId);
   const responseContent = createResponseContent(new Array<ImageData>(result));
 
   postResponse({ information: responseInformation, content: responseContent });
@@ -100,7 +100,7 @@ function handleCombineEchelonsRequest(data: IWorkerRequestMessageData): void {
 
 function handleError(error: IWorkerError, data: IWorkerRequestMessageData): void {
   const errorMessage = `There was an error processing the request. Message:${error.message}. Line number ${error.lineno} Column number: ${error.colno}`;
-  const responseInformation = createResponseInformation(WorkerResponseType.Error, data.information.id, errorMessage);
+  const responseInformation = createResponseInformation(WorkerResponseType.Error, data.information.requestId, data.information.processingUnitId, errorMessage);
 
   postResponse({ information: responseInformation });
 }
@@ -196,8 +196,8 @@ function extractEchelons(image: IImage): Array<ImageData> {
 }
 
 
-function createResponseInformation(responseType: WorkerResponseType, requestId: number, message?: string): IResponseInformation {
-  return { requestId: requestId, responseType: responseType, message: message };
+function createResponseInformation(responseType: WorkerResponseType, requestId: number, processingUnitId: number, message?: string): IResponseInformation {
+  return { requestId: requestId, responseType: responseType, message: message, processingUnitId: processingUnitId };
 }
 
 function createResponseContent(imageData: Array<ImageData>): IResponseContent {
