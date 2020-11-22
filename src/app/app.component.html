@@ -58,6 +58,8 @@
     </div>
   </div>
 
+  <div *ngIf="showExtractionDuration" fxFlex fxLayoutAlign="center center">Echelon extraction took {{extractionDuration | number:'1.0'}} miliseconds.</div>
+
   <div fxFlex fxLayout="column" fxLayoutGap="10px" fxFill fxLayoutAlign="center center">
     <div class="result-canvas">
       <canvas #resultCanvas class="image-canvas" [hidden]="resultCanvasHidden"></canvas>
@@ -67,7 +69,7 @@
     </div>
   </div>
 
-</div>
+ </div>
 
 
 

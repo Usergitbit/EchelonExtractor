@@ -30,6 +30,8 @@ export class AppComponent implements AfterViewInit {
   public faQuestionCircle = faQuestionCircle;
   public faArrowAltCircleDown = faArrowAltCircleDown;
   public resultCanvasHidden = true;
+  public extractionDuration = 0;
+  public showExtractionDuration = false;
 
   public constructor(private snackBar: MatSnackBar, private imageProcessingService: ImageProcessingService) {
   }
@@ -47,6 +49,7 @@ export class AppComponent implements AfterViewInit {
   public onFileSelected(target: EventTarget | null): void {
     this.files = [];
     this.resultCanvasHidden = true;
+    this.showExtractionDuration = false;
     this.extractedEchelons = [];
     const value = target as HTMLInputElement;
     if (value == null || value.files == null || value.files.length === 0) {
@@ -91,6 +94,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   public extractAllEchelons(): void {
+    this.showExtractionDuration = false;
     this.isWorking = true;
     const selectedImagesdata = new Array<ImageData>();
     this.selectedImagesCanvasesQueryList.forEach(elementRef => {
@@ -103,7 +107,7 @@ export class AppComponent implements AfterViewInit {
     });
 
     this.clearSelectedFiles();
-    
+
     const t0 = performance.now();
     this.imageProcessingService.extractEchelons(selectedImagesdata)
       .subscribe(images => {
@@ -115,8 +119,9 @@ export class AppComponent implements AfterViewInit {
         });
 
         const t1 = performance.now();
-        console.log("Echelon extraction took " + (t1 - t0) + " milliseconds.");
-
+        console.log(`Echelon extraction took ${(t1 - t0)} milliseconds.`);
+        this.extractionDuration = (t1 - t0);
+        this.showExtractionDuration = true;
       },
         error => {
           console.log(error);
@@ -129,6 +134,7 @@ export class AppComponent implements AfterViewInit {
     const imagesData = selectedEchelons.map(echelon => echelon.imageData);
     this.extractedEchelons = [];
     this.isWorking = true;
+    this.showExtractionDuration = false;
     this.imageProcessingService.combineEchelons(imagesData)
       .subscribe(data => {
         this.isWorking = false;
