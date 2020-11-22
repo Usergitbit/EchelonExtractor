@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EchelonCanvasComponent } from './echelon-canvas.component';
 
@@ -6,7 +6,7 @@ describe('EchelonCanvasComponent', () => {
   let component: EchelonCanvasComponent;
   let fixture: ComponentFixture<EchelonCanvasComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ EchelonCanvasComponent ]
     })
