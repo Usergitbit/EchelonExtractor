@@ -1,8 +1,0 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs/slnx.sqlite
-/.vs/EchelonExtractor/config/applicationhost.config
-/.vs/EchelonExtractor/v16/.suo
-/.vs/ProjectSettings.json
