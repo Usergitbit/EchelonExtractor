@@ -17,6 +17,7 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 ## Change Log
 
 1.1 - Angular10 -> Angular11
+
 1.0 - Initial release
 
 ## License
