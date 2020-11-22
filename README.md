@@ -18,7 +18,7 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 
 22 November 2020 - v1.1 Angular10 -> Angular11
 
-2 September 2020 - v1.0 Initial release
+02 September 2020 - v1.0 Initial release
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
