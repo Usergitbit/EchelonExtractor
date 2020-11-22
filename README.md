@@ -12,12 +12,12 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 
 ## Known issues
 
-~~The compiler currently strips the code from the worker file when building in production with AOT. The workaround is to build for production without AOT then copy the contents of the worker file over the content in the build with optimizations. The service worker hash will also have to be updated manually.~~ Should be fine now with Angular11
+~~The compiler currently strips the code from the worker file when building in production with AOT. The workaround is to build for production without AOT then copy the contents of the worker file over the content in the build with optimizations. The service worker hash will also have to be updated manually.~~ Should be fine now with Angular11.
 
-##Change Log
+## Change Log
 
 1.1 - Angular10 -> Angular11
-1.0 - Initial release.
+1.0 - Initial release
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
