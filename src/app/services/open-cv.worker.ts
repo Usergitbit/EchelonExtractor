@@ -171,7 +171,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
     const rectangle = cv.boundingRect(contour);
     const aspectRatio = rectangle.width / rectangle.height;
     if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rectangle.width > 100) {
-      console.log(`${i} : Width:${rectangle.width} Height:${rectangle.height}`);
+      // console.log(`${i} : Width:${rectangle.width} Height:${rectangle.height}`);
       // const contoursColor = new cv.Scalar(255, 255, 255);
       // const rectangleColor = new cv.Scalar(255, 0, 0);
       // cv.drawContours(destinationMat, contours, 0, contoursColor, 1, 8, hierarchy, 100);

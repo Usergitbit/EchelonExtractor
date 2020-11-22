@@ -1,2 +1,4 @@
 ng build --base-href=/EchelonExtractor/ --prod
 ng deploy --base-href=/EchelonExtractor/ --no-build
+
+ng serve --host 192.168.322.144 --port 6300

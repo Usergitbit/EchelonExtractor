@@ -91,7 +91,7 @@ export class ImageProcessingService {
   private handleResponseMessage(data: IWorkerResponseMessageData): void {
     switch (data.information.responseType) {
       case WorkerResponseType.LoadCompleted: {
-        console.log("OpenCV has been loaded.");
+        //console.log("OpenCV has been loaded.");
         this.isLoadedSubject.next(true);
         break;
       }
