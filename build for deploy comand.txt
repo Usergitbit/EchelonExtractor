@@ -1,4 +1,7 @@
 ng build --base-href=/EchelonExtractor/ --prod
 ng deploy --base-href=/EchelonExtractor/ --no-build
 
+//while waiting for cli fix we have to use this global command
+npx angular-cli-ghpages --dir=dist/EchelonExtractor
+
 ng serve --host 192.168.322.144 --port 6300
