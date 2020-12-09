@@ -13,7 +13,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
 import { MatIconModule } from "@angular/material/icon";
-
+import { DragDropModule } from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [
@@ -31,7 +31,8 @@ import { MatIconModule } from "@angular/material/icon";
     MatButtonModule,
     MatIconModule,
     ServiceWorkerModule.register("ngsw-worker.js", { enabled: environment.production }),
-    FontAwesomeModule
+    FontAwesomeModule,
+    DragDropModule 
   ],
   providers: [],
   bootstrap: [AppComponent]

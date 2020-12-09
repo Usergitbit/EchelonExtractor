@@ -52,8 +52,8 @@
     </div>
   </div>
 
-  <div fxFlex fxLayout="row wrap" fxLayoutAlign="center center">
-    <div *ngFor="let echelon of extractedEchelons">
+  <div fxFlex fxLayout="column wrap" fxLayoutAlign="center center" cdkDropList (cdkDropListDropped)="onDrop($event)" class="example-list">
+    <div *ngFor="let echelon of extractedEchelons" cdkDrag class="example-box">
       <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
     </div>
   </div>

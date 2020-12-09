@@ -8,6 +8,7 @@ import { faQuestionCircle, faArrowAltCircleDown } from "@fortawesome/free-regula
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
 import { environment } from "../environments/environment";
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Component({
   selector: "app-root",
@@ -162,10 +163,14 @@ export class AppComponent implements AfterViewInit {
   }
 
   public onDownloadClick(): void {
-    const image = this.resultCanvasElementRef.nativeElement.toDataURL("image/jpg", 1.0);
+    const image = this.resultCanvasElementRef.nativeElement.toDataURL("image/png", 1.0);
     const a = document.createElement("a");
     a.href = image;
-    a.download = "echelons.jpg";
+    a.download = "echelons.png";
     a.click();
+  }
+
+  public onDrop(event: CdkDragDrop<Echelon[]>): void {
+    moveItemInArray(this.extractedEchelons, event.previousIndex, event.currentIndex);
   }
 }
