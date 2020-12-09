@@ -16,7 +16,7 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 
 ## Change Log
 
-09 December 2020 - v1.3.0 change extracted echelons to be in list format and added drag and drop 
+09 December 2020 - v1.3.0 changed extracted echelons to be in list format and added drag and drop 
 
 22 November 2020 - v1.2.0 Added multi-threading support
 
