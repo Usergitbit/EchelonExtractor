@@ -146,11 +146,9 @@ function combineEchelons(images: Array<IImage>): ImageData {
 
 function extractEchelons(image: IImage): Array<ImageData> {
 
-
   const imageData = new ImageData(new Uint8ClampedArray(image.imageArrayBuffer), image.width, image.height);
   const initialMat = cv.matFromImageData(imageData);
   const processedMat = cv.matFromImageData(imageData);
-  // let destinationMat = cv.Mat.zeros(processedMat.rows, processedMat.cols, cv.CV_8UC3);
 
   // grayscale
   cv.cvtColor(processedMat, processedMat, cv.COLOR_RGBA2GRAY, 0);
@@ -164,26 +162,15 @@ function extractEchelons(image: IImage): Array<ImageData> {
 
   for (let i = 0; i < contours.size(); i++) {
     const contour = contours.get(i);
-    // let approximation = new cv.Mat();
-    // let perimeter = cv.arcLength(contour, true);
-    // cv.approxPolyDP(contour, approximation, 0.04 * perimeter, true);
 
     const rectangle = cv.boundingRect(contour);
     const aspectRatio = rectangle.width / rectangle.height;
     if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rectangle.width > 100) {
-      // console.log(`${i} : Width:${rectangle.width} Height:${rectangle.height}`);
-      // const contoursColor = new cv.Scalar(255, 255, 255);
-      // const rectangleColor = new cv.Scalar(255, 0, 0);
-      // cv.drawContours(destinationMat, contours, 0, contoursColor, 1, 8, hierarchy, 100);
-      // let point1 = new cv.Point(rectangle.x, rectangle.y);
-      // let point2 = new cv.Point(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
-      // cv.rectangle(destinationMat, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
       const resultMat = initialMat.roi(rectangle);
       const echelonImageData = imageDataFromMat(resultMat);
       imageDataResults.push(echelonImageData);
       resultMat.delete();
     }
-    // approximation.delete();
     contour.delete();
   }
 
@@ -192,7 +179,8 @@ function extractEchelons(image: IImage): Array<ImageData> {
   processedMat.delete();
   initialMat.delete();
 
-  return imageDataResults;
+  //the order of the contours is reversed for some reason so we revert it back
+  return imageDataResults.reverse();
 }
 
 

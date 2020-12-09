@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Launch Chrome against 192.168.50.227",
             "type": "chrome",
@@ -22,6 +23,14 @@
             "name": "Launch Brave against 192.168.50.227",
             "runtimeExecutable": "C:/Program Files (x86)/BraveSoftware/Brave-Browser/Application/brave.exe",
             "url": "http://192.168.50.227:4200",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Brave against localhost",
+            "runtimeExecutable": "C:/Program Files (x86)/BraveSoftware/Brave-Browser/Application/brave.exe",
+            "url": "http://localhost:4200",
             "webRoot": "${workspaceFolder}"
         }
     ]
