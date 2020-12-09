@@ -35,6 +35,7 @@ export class AppComponent implements AfterViewInit {
   public resultCanvasHidden = true;
   public extractionDuration = 0;
   public showExtractionDuration = false;
+  public enableReordering = true;
 
   public constructor(private snackBar: MatSnackBar, private imageProcessingService: ImageProcessingService) {
   }

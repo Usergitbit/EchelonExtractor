@@ -14,6 +14,8 @@ import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
 import { MatIconModule } from "@angular/material/icon";
 import { DragDropModule } from "@angular/cdk/drag-drop";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { FormsModule } from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -32,7 +34,9 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     MatIconModule,
     ServiceWorkerModule.register("ngsw-worker.js", { enabled: environment.production }),
     FontAwesomeModule,
-    DragDropModule 
+    DragDropModule,
+    MatCheckboxModule,
+    FormsModule 
   ],
   providers: [],
   bootstrap: [AppComponent]
