@@ -36,6 +36,7 @@ export class AppComponent implements AfterViewInit {
   public extractionDuration = 0;
   public showExtractionDuration = false;
   public enableReordering = true;
+  public rowsLayout = "";
 
   public constructor(private snackBar: MatSnackBar, private imageProcessingService: ImageProcessingService) {
   }

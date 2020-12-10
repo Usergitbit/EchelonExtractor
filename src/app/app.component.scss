@@ -69,15 +69,26 @@
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.footer {
+/* .footer {
   position: fixed;
   left: 0;
   bottom: 0;
   width: 100%;
   text-align: center;
   background-color: #292e2a;
+} */
+.main-grid-area {
+  overflow: auto;
 }
-
 .enable-reordering-checkbox {
   margin: 10px;
+}
+
+.grid{
+  height: 100vh;
+}
+
+.download-button {
+  min-width: 250px;
+  margin-bottom: 10px;
 }

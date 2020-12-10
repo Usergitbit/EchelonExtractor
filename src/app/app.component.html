@@ -1,85 +1,94 @@
-<div fxLayout="column" fxFill fxLayoutGap="10px">
-  <div class="toolbar" fxLayout="row">
-    <img width="40" alt="Griffin and Kryuger Logo" src="assets/images/griffinAndKryugerLogoWhite.png" />
-    <span>Echelon Extractor v{{environment.VERSION}}</span>
-    <div class="spacer"></div>
-    <div class="github-link">
-      <a aria-label="How to guide" target="_blank" rel="noopener"
-        href="https://github.com/Usergitbit/EchelonExtractor/wiki/How-to-use" title="How to guide">
-        <fa-icon [icon]="faQuestionCircle" class="icon"></fa-icon>
-      </a>
-      <a class="github-icon" aria-label="Source code" target="_blank" rel="noopener"
-        href="https://github.com/Usergitbit/EchelonExtractor" title="Source code">
-        <fa-icon [icon]="faGithub" class="icon"></fa-icon>
-      </a>
+<div gdAreas="header | main | footer" gdRows="auto 1fr auto" gdGap="10px" class="grid">
+
+  <div gdArea="header">
+    <div class="toolbar" fxLayout="row">
+      <img width="40" alt="Griffin and Kryuger Logo" src="assets/images/griffinAndKryugerLogoWhite.png" />
+      <span>Echelon Extractor v{{environment.VERSION}}</span>
+      <div class="spacer"></div>
+      <div class="github-link">
+        <a aria-label="How to guide" target="_blank" rel="noopener"
+          href="https://github.com/Usergitbit/EchelonExtractor/wiki/How-to-use" title="How to guide">
+          <fa-icon [icon]="faQuestionCircle" class="icon"></fa-icon>
+        </a>
+        <a class="github-icon" aria-label="Source code" target="_blank" rel="noopener"
+          href="https://github.com/Usergitbit/EchelonExtractor" title="Source code">
+          <fa-icon [icon]="faGithub" class="icon"></fa-icon>
+        </a>
+      </div>
+    </div>
+
+    <div fxLayout.xs="column" fxLayout.lg="row" fxLayoutAlign="center center" fxLayoutGap="10px">
+      <div>
+        <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
+          accept="image/*" #imgFileInput multiple="true" />
+        <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()"
+          [disabled]="(!isReady || isWorking) " class="button">Choose screenshots</button>
+      </div>
+
+      <div fxLayout="row wrap" fxLayoutGap="10px" fxFlexAlign="center center">
+        <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button"
+          [disabled]="(files.length ==0 || !isReady || isWorking)">
+          Extract Echelons
+        </button>
+
+        <button mat-raised-button color="primary" type="button" (click)="combineSelectedEchelons()"
+          [disabled]="(extractedEchelons.length == 0 || !isReady || isWorking)" class="button">
+          Combine echelons
+        </button>
+      </div>
+
     </div>
   </div>
 
-  <div fxLayout.xs="column" fxLayout.lg="row" fxLayoutAlign="center center" fxLayoutGap="10px">
-    <div>
-      <input hidden (change)="onFileSelected($event.target)" #fileInput type="file" id="fileInput" name="file"
-        accept="image/*" #imgFileInput multiple="true" />
-      <button mat-raised-button color="primary" type="button" md-button (click)="imgFileInput.click()"
-        [disabled]="(!isReady || isWorking) " class="button">Choose screenshots</button>
-    </div>
 
-    <div fxLayout="row wrap" fxLayoutGap="10px" fxFlexAlign="center center">
-      <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button"
-        [disabled]="(files.length ==0 || !isReady || isWorking)">
-        Extract Echelons
-      </button>
 
-      <button mat-raised-button color="primary" type="button" (click)="combineSelectedEchelons()"
-        [disabled]="(extractedEchelons.length == 0 || !isReady || isWorking)" class="button">
-        Combine echelons
-      </button>
-    </div>
+  <div gdArea="main" fxLayout="column" fxFill fxLayoutGap="10px" class="main-grid-area" cdkScrollable >
 
-  </div>
+    <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="center center">
+      <div *ngIf="isReady else loadingTemplate" fxFill>
 
-  <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="center center">
-    <div *ngIf="isReady else loadingTemplate" fxFill>
+        <div fxLayout="row wrap" fxLayoutGap="10px" fxLayoutAlign="center center" fxFill>
+          <div *ngFor="let fileName of files">
+            <canvas id={{fileName}} title={{fileName}} #canvasSelector class="image-canvas"></canvas>
+          </div>
+        </div>
 
-      <div fxLayout="row wrap" fxLayoutGap="10px" fxLayoutAlign="center center" fxFill>
-        <div *ngFor="let fileName of files">
-          <canvas id={{fileName}} title={{fileName}} #canvasSelector class="image-canvas"></canvas>
+        <div *ngIf="isWorking" fxLayoutAlign="center center">
+          <mat-spinner></mat-spinner>
         </div>
       </div>
+    </div>
 
-      <div *ngIf="isWorking" fxLayoutAlign="center center">
-        <mat-spinner></mat-spinner>
+    <div fxFlex fxLayout="column" fxLayoutAlign.lt-sm="center start" fxLayoutAlign.gt-xs="center center" cdkDropList
+      (cdkDropListDropped)="onDrop($event)" class="example-list" *ngIf="extractedEchelons.length != 0">
+      <div *ngFor="let echelon of extractedEchelons" cdkDrag class="example-box" [cdkDragDisabled]="!enableReordering">
+        <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
       </div>
     </div>
-  </div>
 
-  <div fxFlex fxLayout="column" fxLayoutAlign.lt-sm="center start" fxLayoutAlign.gt-xs="center center" cdkDropList (cdkDropListDropped)="onDrop($event)"
-    class="example-list">
-    <div *ngFor="let echelon of extractedEchelons" cdkDrag class="example-box" [cdkDragDisabled]="!enableReordering">
-      <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
+    <div *ngIf="showExtractionDuration" fxFlex fxLayoutAlign="center center">Echelon extraction took
+      {{extractionDuration | number:'1.0'}} miliseconds.</div>
+
+    <div fxFlex fxLayout="column" fxLayoutGap="10px" fxFill fxLayoutAlign="center center">
+      <div class="result-canvas">
+        <canvas #resultCanvas class="image-canvas" [hidden]="resultCanvasHidden"></canvas>
+
+      </div>
     </div>
+
   </div>
 
-  <div *ngIf="showExtractionDuration" fxFlex fxLayoutAlign="center center">Echelon extraction took
-    {{extractionDuration | number:'1.0'}} miliseconds.</div>
+  <div gdArea="footer">
+    <div fxLayout="column" fxLayoutAlign="center center" >
+      <mat-checkbox class="example-margin" [(ngModel)]="enableReordering" class="enable-reordering-checkbox "
+        color="primary" *ngIf="(extractedEchelons.length != 0)">Enable reordering</mat-checkbox>
 
-  <div fxFlex fxLayout="column" fxLayoutGap="10px" fxFill fxLayoutAlign="center center">
-    <div class="result-canvas">
-      <canvas #resultCanvas class="image-canvas" [hidden]="resultCanvasHidden"></canvas>
-      <button *ngIf="!resultCanvasHidden" mat-raised-button color="primary" (click)="onDownloadClick()" fxFill>
-        <mat-icon>save_alt</mat-icon>
-      </button>
+        <button *ngIf="!resultCanvasHidden" mat-raised-button color="primary" (click)="onDownloadClick()" class="download-button" >
+          <mat-icon>save_alt</mat-icon>
+        </button>
     </div>
-  </div>
-
-  <div class="footer" *ngIf="(extractedEchelons.length != 0)" fxFlexOffset="auto">
-    <mat-checkbox class="example-margin" [(ngModel)]="enableReordering" class="enable-reordering-checkbox " color="primary">Enable reordering</mat-checkbox>
   </div>
 </div>
-
-
-
-
-
 
 <ng-template #loadingTemplate>
   <mat-spinner></mat-spinner>
