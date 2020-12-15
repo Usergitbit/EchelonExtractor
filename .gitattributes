@@ -8,3 +8,4 @@ assets/opencv/data/haarcascades/* linguist-vendored
 opencv/wasm/3.4/* linguist-vendored
 opencv/asm/3.4/* linguist-vendored
 opencv/wasm/4.4/* linguist-vendored
+src/assets/opencv/wasm/4.4/* linguist-vendored
