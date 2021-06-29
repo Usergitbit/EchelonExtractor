@@ -1,5 +1,6 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
-@include mat-core();
+@include mat.core();
 
 $md-griffin: (
     50 : #fffbe0,
@@ -34,17 +35,17 @@ $md-griffin: (
     )
 );
 
-$griffin-primary: mat-palette($md-griffin);
-$griffn-accent:  mat-palette($mat-pink, A200, A100, A400);
+$griffin-primary: mat.define-palette($md-griffin);
+$griffn-accent:  mat.define-palette(mat.$pink-palette, A200, A100, A400);
 
 // The warn palette is optional (defaults to red).
-$griffin-warn:    mat-palette($mat-red);
+$griffin-warn:    mat.define-palette(mat.$red-palette);
 
-$theme: mat-dark-theme($griffin-primary, $griffn-accent, $griffin-warn);
+$theme: mat.define-dark-theme($griffin-primary, $griffn-accent, $griffin-warn);
 
 $griffin-background-color: #4b4b4d;//#7e807f; //dbd9dc
 $background: map-get($theme, background);
 $background: map_merge($background, (background: $griffin-background-color));
 $theme: map_merge($theme, (background: $background));
 
-@include angular-material-theme($theme);
+@include mat.all-component-themes($theme);

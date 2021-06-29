@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import '../../../theme.scss';
 $primary: map-get($theme, primary);
 
@@ -33,6 +34,6 @@ $primary: map-get($theme, primary);
 
 
 .selected {
-    border-color: mat-color($primary);
+    border-color: mat.get-color-from-palette($primary);
     border-width: 2px;
 }
