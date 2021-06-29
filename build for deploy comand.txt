@@ -1,4 +1,4 @@
-ng build --base-href=/EchelonExtractor/ --prod
+ng build --base-href=/EchelonExtractor/ --configuration production
 ng deploy --base-href=/EchelonExtractor/ --no-build
 
 //while waiting for cli fix we have to use this global command
