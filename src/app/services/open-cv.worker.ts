@@ -165,7 +165,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
 
     const rectangle = cv.boundingRect(contour);
     const aspectRatio = rectangle.width / rectangle.height;
-    if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && rectangle.width > 100) {
+    if (isGriffinEchelon(aspectRatio, rectangle.width) || isSangvisEchelon(aspectRatio, rectangle.width)) {
       const resultMat = initialMat.roi(rectangle);
       const echelonImageData = imageDataFromMat(resultMat);
       imageDataResults.push(echelonImageData);
@@ -179,10 +179,25 @@ function extractEchelons(image: IImage): Array<ImageData> {
   processedMat.delete();
   initialMat.delete();
 
-  //the order of the contours is reversed for some reason so we revert it back
+  // the order of the contours is reversed for some reason so we revert it back
   return imageDataResults.reverse();
 }
 
+function isGriffinEchelon(aspectRatio: number, width: number): boolean {
+  if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && width > 100) {
+    return true;
+  }
+
+  return false;
+}
+
+function isSangvisEchelon(aspectRatio: number, width: number): boolean {
+  if (aspectRatio >= 4.7 && aspectRatio <= 5 && width > 150) {
+    return true;
+  }
+
+  return false;
+}
 
 function createResponseInformation(responseType: WorkerResponseType, requestId: number, processingUnitId: number, message?: string): IResponseInformation {
   return { requestId: requestId, responseType: responseType, message: message, processingUnitId: processingUnitId };
