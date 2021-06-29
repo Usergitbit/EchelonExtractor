@@ -1,6 +1,6 @@
 # EchelonExtractor
 
-This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/) to extract your echelons from screenshots of your ID card into a single compact image. It is built using Angular 11 and OpenCVJS 4.4 (webassembly version running in a web worker). It is available online [here](https://usergitbit.github.io/EchelonExtractor/) and can also be installed as PWA. See [wiki](https://github.com/Usergitbit/EchelonExtractor/wiki/How-to-use) for usage.
+This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/) to extract your echelons from screenshots of your ID card into a single compact image. It is built using Angular 12 and OpenCVJS 4.4 (webassembly version running in a web worker). It is available online [here](https://usergitbit.github.io/EchelonExtractor/) and can also be installed as PWA. See [wiki](https://github.com/Usergitbit/EchelonExtractor/wiki/How-to-use) for usage.
 
 ## Building for development
 
@@ -8,13 +8,14 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 
 ## Building for production
 
-`ng build --prod`
+`ng build --configuration production`
 
 ## Known issues
 
-~~The compiler currently strips the code from the worker file when building in production with AOT. The workaround is to build for production without AOT then copy the contents of the worker file over the content in the build with optimizations. The service worker hash will also have to be updated manually.~~ Should be fine now with Angular11.
+~~The compiler currently strips the code from the worker file when building in production with AOT. The workaround is to build for production without AOT then copy the contents of the worker file over the content in the build with optimizations. The service worker hash will also have to be updated manually.~~ Should be fine as of Angular11.
 
 ## Change Log
+29 June 2021 - v1.4.0 Added Sangvis echelon support, Angular11 -> Angular12
 
 10 December 2020 - v1.3.2 some layout changes
 
