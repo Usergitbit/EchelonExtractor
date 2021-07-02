@@ -18,7 +18,7 @@ export class ProcessingUnit {
         return this.id;
     }
 
-    constructor(totalImages: number) {
+    public constructor(totalImages: number) {
         this.totalImages = totalImages;
         this.id = ProcessingUnit.processingUnitId++;
     }

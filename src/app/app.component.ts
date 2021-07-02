@@ -61,7 +61,7 @@ export class AppComponent implements AfterViewInit {
       return;
     }
     else {
-      // tslint:disable-next-line: prefer-for-of
+      // eslint-disable-next-line @typescript-eslint/prefer-for-of
       for (let i = 0; i < value.files.length; i++) {
         const file = value.files[i];
         this.files.push(file.name);
@@ -82,7 +82,7 @@ export class AppComponent implements AfterViewInit {
     if (data != null && data.target != null) {
       const image = new Image();
 
-      image.onload = (img) => {
+      image.onload = (img): void => {
         const canvas = this.selectedImagesCanvasesQueryList.find(x => x.nativeElement?.title === fileName)?.nativeElement;
         const context = canvas?.getContext("2d");
         const imageElement = img.target as HTMLImageElement;

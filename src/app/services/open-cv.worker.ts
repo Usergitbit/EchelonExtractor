@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-// tslint:disable-next-line: no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare var cv: any;
 import {
   IWorkerRequestMessageEvent, IWorkerResponseMessageData, WorkerRequestType, WorkerResponseType,
@@ -7,7 +7,7 @@ import {
 } from "../models";
 
 export interface IModule extends WorkerGlobalScope {
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Module: any;
 }
 
@@ -48,12 +48,12 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
 
 async function handleLoadRequest(data: IWorkerRequestMessageData): Promise<void> {
   console.log("Recieved load request");
-  // tslint:disable-next-line: no-string-literal
+  // eslint-disable-next-line @typescript-eslint/dot-notation
   (self as unknown as IModule)["Module"] = {
     wasmBinaryFile: "assets/opencv/wasm/4.4/opencv_js.wasm",
     usingWasm: true,
     locateFile: locateFile,
-    onRuntimeInitialized: () => {
+    onRuntimeInitialized: (): void => {
       // postResponse( {information: { responseType: WorkerResponseType.Error, requestId: data.information.id, message: "dummy error"}  });
       postResponse({ information: { responseType: WorkerResponseType.LoadCompleted, requestId: data.information.requestId, processingUnitId: data.information.processingUnitId } });
     }
@@ -230,7 +230,7 @@ function locateFile(path: string, scriptDirectory: string): string {
   }
 }
 
-// tslint:disable-next-line: no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function imageDataFromMat(mat: any): ImageData {
   // converts the mat type to cv.CV_8U
   const img = new cv.Mat();

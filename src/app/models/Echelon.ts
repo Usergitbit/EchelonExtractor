@@ -9,7 +9,7 @@ export class Echelon {
         return this.id;
     }
 
-    public constructor(imageData: ImageData, selected?: boolean) {
+    public constructor(imageData: ImageData) {
         this.imageData = imageData;
     }
 }

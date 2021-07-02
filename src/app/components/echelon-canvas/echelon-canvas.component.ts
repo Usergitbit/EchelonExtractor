@@ -14,8 +14,6 @@ export class EchelonCanvasComponent implements AfterViewInit {
   @Input()
   public echelon = new Echelon(new ImageData(1, 1));
 
-  public constructor() { }
-
   public ngAfterViewInit(): void {
     const canvas = this.canvas?.nativeElement;
     if (canvas) {

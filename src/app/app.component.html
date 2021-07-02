@@ -27,12 +27,12 @@
 
       <div fxLayout="row wrap" fxLayoutGap="10px" fxFlexAlign="center center">
         <button mat-raised-button color="primary" type="button" (click)="extractAllEchelons()" class="button"
-          [disabled]="(files.length ==0 || !isReady || isWorking)">
+          [disabled]="(files.length === 0 || !isReady || isWorking)">
           Extract Echelons
         </button>
 
         <button mat-raised-button color="primary" type="button" (click)="combineSelectedEchelons()"
-          [disabled]="(extractedEchelons.length == 0 || !isReady || isWorking)" class="button">
+          [disabled]="(extractedEchelons.length === 0 || !isReady || isWorking)" class="button">
           Combine echelons
         </button>
       </div>
@@ -60,7 +60,7 @@
     </div>
 
     <div fxFlex fxLayout="column" fxLayoutAlign.lt-sm="center start" fxLayoutAlign.gt-xs="center center" cdkDropList
-      (cdkDropListDropped)="onDrop($event)" class="example-list" *ngIf="extractedEchelons.length != 0">
+      (cdkDropListDropped)="onDrop($event)" class="example-list" *ngIf="extractedEchelons.length !== 0">
       <div *ngFor="let echelon of extractedEchelons" cdkDrag class="example-box" [cdkDragDisabled]="!enableReordering">
         <app-echelon-canvas [echelon]="echelon" fxFlex="nogrow"></app-echelon-canvas>
       </div>
@@ -81,7 +81,7 @@
   <div gdArea="footer">
     <div fxLayout="column" fxLayoutAlign="center center" >
       <mat-checkbox class="example-margin" [(ngModel)]="enableReordering" class="enable-reordering-checkbox "
-        color="primary" *ngIf="(extractedEchelons.length != 0)">Enable reordering</mat-checkbox>
+        color="primary" *ngIf="(extractedEchelons.length !== 0)">Enable reordering</mat-checkbox>
 
         <button *ngIf="!resultCanvasHidden" mat-raised-button color="primary" (click)="onDownloadClick()" class="download-button" >
           <mat-icon>save_alt</mat-icon>
