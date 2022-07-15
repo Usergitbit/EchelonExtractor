@@ -26,5 +26,5 @@ jobs:
       with:
         folder: dist/EchelonExtractor
         permissions:
-        contents: write
+          contents: write
            
