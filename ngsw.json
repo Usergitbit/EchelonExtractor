@@ -1,0 +1,91 @@
+{
+  "configVersion": 1,
+  "timestamp": 1657926772155,
+  "index": "/EchelonExtractor/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/EchelonExtractor/730.6f3b1dc9b7b2bd571a87.js",
+        "/EchelonExtractor/favicon.ico",
+        "/EchelonExtractor/index.html",
+        "/EchelonExtractor/main.e1e8215ccae65aea6833.js",
+        "/EchelonExtractor/manifest.webmanifest",
+        "/EchelonExtractor/polyfills.b36b73d321cce032b6ae.js",
+        "/EchelonExtractor/runtime.ffcc7372564cd1af2564.js",
+        "/EchelonExtractor/styles.304b4aec116a9f8528d0.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/EchelonExtractor/assets/icons/icon-128x128.png",
+        "/EchelonExtractor/assets/icons/icon-144x144.png",
+        "/EchelonExtractor/assets/icons/icon-152x152.png",
+        "/EchelonExtractor/assets/icons/icon-192x192.png",
+        "/EchelonExtractor/assets/icons/icon-384x384.png",
+        "/EchelonExtractor/assets/icons/icon-512x512.png",
+        "/EchelonExtractor/assets/icons/icon-72x72.png",
+        "/EchelonExtractor/assets/icons/icon-96x96.png",
+        "/EchelonExtractor/assets/images/griffinAndKryugerLogoWhite.png",
+        "/EchelonExtractor/assets/images/ribdiedinside.png",
+        "/EchelonExtractor/assets/opencv/wasm/4.4/opencv.js",
+        "/EchelonExtractor/assets/opencv/wasm/4.4/opencv_js.wasm"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/EchelonExtractor/730.6f3b1dc9b7b2bd571a87.js": "455a3934392f1d915953e9af310381a1f6e9467b",
+    "/EchelonExtractor/assets/icons/icon-128x128.png": "6af5d991d55ce2a22a3b762bd5cf6cf2ee9de058",
+    "/EchelonExtractor/assets/icons/icon-144x144.png": "ba03b09383161851ab928e7d24679422ac715f3d",
+    "/EchelonExtractor/assets/icons/icon-152x152.png": "580c78eb03c46392f969364cac5823771151b9f8",
+    "/EchelonExtractor/assets/icons/icon-192x192.png": "22b19fa8ce86b3309d2d51f2e464dc4371ec70ff",
+    "/EchelonExtractor/assets/icons/icon-384x384.png": "1343557f5e91ec9909271a888d79710c1093c3e0",
+    "/EchelonExtractor/assets/icons/icon-512x512.png": "f6f90f7c06bc854a1fc9d0dfb47664130f3ae1ed",
+    "/EchelonExtractor/assets/icons/icon-72x72.png": "ba85fc949095653f6fa52d22b3e9bf755793cca1",
+    "/EchelonExtractor/assets/icons/icon-96x96.png": "03638e9c056c8e1a19dea6f5d0793822c65bf970",
+    "/EchelonExtractor/assets/images/griffinAndKryugerLogoWhite.png": "b9ebb017b9432531f121b3cb22ae9451ef584e2b",
+    "/EchelonExtractor/assets/images/ribdiedinside.png": "a98175924c637407ce299981e42b6478ef829008",
+    "/EchelonExtractor/assets/opencv/wasm/4.4/opencv.js": "eece8ccef869e3bea1dd1ce1f5169c7081a67f76",
+    "/EchelonExtractor/assets/opencv/wasm/4.4/opencv_js.wasm": "ad2ec8cb3251c34a846abb2e94b792b72fe8cca6",
+    "/EchelonExtractor/favicon.ico": "fbb4e4f8c9968f0569ad7b13b7956e97ad313400",
+    "/EchelonExtractor/index.html": "5e548ee213b2054031f2bc37ef1a2d47042b4660",
+    "/EchelonExtractor/main.e1e8215ccae65aea6833.js": "1856da17b42071ca549e0363fafdb46ddc988576",
+    "/EchelonExtractor/manifest.webmanifest": "f947677449a688b128110f85b334921f85d5949a",
+    "/EchelonExtractor/polyfills.b36b73d321cce032b6ae.js": "12ecbe751ece1671706914b7b0b43df66894e42c",
+    "/EchelonExtractor/runtime.ffcc7372564cd1af2564.js": "148e16126d32713c52f53311fc09e7980e689167",
+    "/EchelonExtractor/styles.304b4aec116a9f8528d0.css": "cfb3581aca558cff794564c6df5a0c49332f1c63"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
