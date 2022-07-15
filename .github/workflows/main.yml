@@ -22,9 +22,9 @@ jobs:
     - run: ng build --configuration=production --base-href=/EchelonExtractor/
 
     - name: Deploy 
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist/EchelonExtractor
-        permissions:
-          contents: write
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: dist/EchelonExtractor
+      permissions:
+        contents: write
            
