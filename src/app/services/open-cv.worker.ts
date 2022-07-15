@@ -19,7 +19,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
         handleLoadRequest(data);
       }
       catch (error) {
-        handleError(error, data);
+        handleError(error as IWorkerError, data);
       }
       break;
     }
@@ -28,7 +28,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
         handleExtractEchelonRequest(data);
       }
       catch (error) {
-        handleError(error, data);
+        handleError(error as IWorkerError, data);
       }
       break;
     }
@@ -37,7 +37,7 @@ addEventListener("message", (messageEvent: IWorkerRequestMessageEvent) => {
         handleCombineEchelonsRequest(data);
       }
       catch (error) {
-        handleError(error, data);
+        handleError(error as IWorkerError, data);
       }
       break;
     }
@@ -184,7 +184,7 @@ function extractEchelons(image: IImage): Array<ImageData> {
 }
 
 function isGriffinEchelon(aspectRatio: number, width: number): boolean {
-  if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && width > 100) {
+  if (aspectRatio >= 6.1 && aspectRatio <= 6.5 && width > 200) {
     return true;
   }
 
@@ -192,7 +192,7 @@ function isGriffinEchelon(aspectRatio: number, width: number): boolean {
 }
 
 function isSangvisEchelon(aspectRatio: number, width: number): boolean {
-  if (aspectRatio >= 4.7 && aspectRatio <= 5 && width > 150) {
+  if (aspectRatio >= 4.7 && aspectRatio <= 5 && width > 200) {
     return true;
   }
 

@@ -22,7 +22,7 @@ export class ImageProcessingService {
   private combineRequestMap = new Map<number, Subject<ImageData>>();
 
   private availableThreads = 4;
-  constructor() {
+  public constructor() {
   }
 
   public load(): Observable<boolean> {
@@ -32,8 +32,8 @@ export class ImageProcessingService {
 
       for (let i = 0; i < this.availableThreads; i++) {
         this.workerPool[i] = new Worker(new URL("./open-cv.worker", import.meta.url), { type: "module" });
-        this.workerPool[i].onmessage = (message: IWorkerResponseMessageEvent) => { this.handleResponseMessage(message.data); };
-        this.workerPool[i].onerror = (error) => { this.handleCriticalError(error); };
+        this.workerPool[i].onmessage = (message: IWorkerResponseMessageEvent): void => { this.handleResponseMessage(message.data); };
+        this.workerPool[i].onerror = (error): void => { this.handleCriticalError(error); };
         const request = this.createRequestInformation(new ProcessingUnit(1), WorkerRequestType.Load);
         console.log("Sending load request.");
         this.postRequest(this.workerPool[i], { information: request });
