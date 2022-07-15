@@ -19,7 +19,9 @@ jobs:
       run: npm install
 
     - name: Build
-      run: npm run build EchelonExtractor --verbose:true --configuration=production --base-href=/EchelonExtractor/
+      run: |
+      ls
+      npm run build --verbose:true --configuration=production --base-href=/EchelonExtractor/
 
     - name: Deploy 
       uses: JamesIves/github-pages-deploy-action@v4
