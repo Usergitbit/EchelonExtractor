@@ -23,6 +23,7 @@ export class ImageProcessingService {
 
   private availableThreads = 4;
   public constructor() {
+    // do nothing
   }
 
   public load(): Observable<boolean> {
