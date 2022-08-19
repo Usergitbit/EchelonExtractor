@@ -10,11 +10,9 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 
 `ng build --configuration production`
 
-## Known issues
-
-~~The compiler currently strips the code from the worker file when building in production with AOT. The workaround is to build for production without AOT then copy the contents of the worker file over the content in the build with optimizations. The service worker hash will also have to be updated manually.~~ Should be fine as of Angular11.
-
 ## Change Log
+19 Aug 2022 - v1.4.2 Added date suffix to filename
+
 16 July 2022 - v1.4.1 Added deployment pipelines
 
 29 June 2021 - v1.4.0 Added Sangvis echelon support, Angular11 -> Angular12
