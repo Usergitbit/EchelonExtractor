@@ -168,11 +168,27 @@ export class AppComponent implements AfterViewInit {
     const image = this.resultCanvasElementRef.nativeElement.toDataURL("image/png", 1.0);
     const a = document.createElement("a");
     a.href = image;
-    a.download = "echelons.png";
+    const currentDate = new Date();
+    const year = currentDate.getUTCFullYear();
+    const month = this.padZeros(currentDate.getUTCMonth() + 1);
+    const day = this.padZeros(currentDate.getUTCDate());
+    const hours = this.padZeros(currentDate.getUTCHours());
+    const minutes = this.padZeros(currentDate.getUTCMinutes());
+    const seconds = this.padZeros(currentDate.getUTCSeconds());
+    const utcDateString = `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+    a.download = `echelons-${utcDateString}.png`;
     a.click();
   }
 
   public onDrop(event: CdkDragDrop<Echelon[]>): void {
     moveItemInArray(this.extractedEchelons, event.previousIndex, event.currentIndex);
+  }
+
+  private padZeros(number: number): string {
+    if(number >= 10) {
+      return number.toString();
+    }
+
+    return `0${number}`;
   }
 }
