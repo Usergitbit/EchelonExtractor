@@ -11,6 +11,8 @@ This is a tool for the mobile game [Girls' Frontline](http://gf.sunborngame.com/
 `ng build --configuration production`
 
 ## Change Log
+24 Sep 2022 - v1.5.0 Angular 12 -> Angular 15
+
 19 Aug 2022 - v1.4.2 Added date suffix to filename
 
 16 July 2022 - v1.4.1 Added deployment pipelines
