@@ -5,7 +5,7 @@ import { ImageProcessingService } from "./services/image-processing.service";
 import { Echelon } from "./models";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faQuestionCircle, faArrowAltCircleDown } from "@fortawesome/free-regular-svg-icons";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { MessageSnackBarComponent } from "./components/message-snack-bar/message-snack-bar.component";
 import { environment } from "../environments/environment";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
