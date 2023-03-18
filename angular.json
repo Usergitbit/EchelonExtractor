@@ -123,18 +123,6 @@
             ]
           }
         },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "EchelonExtractor:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "EchelonExtractor:serve:production"
-            }
-          }
-        },
         "deploy": {
           "builder": "angular-cli-ghpages:deploy",
           "options": {}
